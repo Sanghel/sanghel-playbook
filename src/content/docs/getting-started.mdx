@@ -1,0 +1,66 @@
+---
+title: Getting Started
+description: Welcome to Sanghel Playbook — a living reference of patterns and decisions.
+order: 1
+---
+
+# Getting Started
+
+Welcome to **Sanghel Playbook**. This is a living document where I capture patterns,
+component decisions, and lessons learned building production software.
+
+## What you'll find here
+
+- Component patterns and design decisions
+- Architecture notes and tradeoffs
+- Code snippets with context
+
+## Running locally
+
+Clone the repo and start the dev server:
+
+```bash
+git clone https://github.com/Sanghel/sanghel-playbook
+cd sanghel-playbook
+pnpm install
+pnpm dev
+```
+
+Then open [http://localhost:3000](http://localhost:3000).
+
+## Adding a doc
+
+Create a `.mdx` file inside `src/content/docs/`:
+
+```mdx
+---
+title: My Topic
+description: A short description.
+order: 2
+---
+
+# My Topic
+
+Write your content here.
+```
+
+<Callout variant="tip">
+  Use frontmatter `order` to control the position of a doc in the sidebar.
+</Callout>
+
+<Callout variant="warning">
+  Always include a `title` in your frontmatter — the sidebar uses it to build navigation.
+</Callout>
+
+## Syntax highlighting
+
+Code blocks use Shiki with the `github-dark` theme:
+
+```typescript
+function greet(name: string): string {
+  return `Hello, ${name}!`
+}
+
+const message = greet('world')
+console.log(message)
+```
