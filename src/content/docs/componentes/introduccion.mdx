@@ -1,0 +1,36 @@
+---
+title: Componentes
+description: Estándares y convenciones para crear componentes en Sanghel Playbook
+section: Componentes
+order: 10
+---
+
+# Componentes
+
+Todos los componentes del proyecto siguen un único principio rector: **separación de responsabilidades**. El renderizado y la lógica son preocupaciones distintas y deben vivir en archivos distintos.
+
+## Filosofía
+
+Un componente de React tiene dos trabajos: decidir qué mostrar y cuándo mostrarlo. Cuando ambas cosas conviven en el mismo archivo, el código se vuelve difícil de leer, probar y mantener.
+
+La solución es dividir cada componente en tres capas:
+
+- **Renderizado** (`index.tsx`): sabe *cómo* se ve la interfaz, no *por qué*.
+- **Lógica** (`useController[Nombre].ts`): sabe *qué* datos necesita el renderizado y *cómo* obtenerlos.
+- **Tipos** (`types.ts`): describe *qué forma* tienen los datos que fluyen entre las capas.
+
+Con esta separación, cambiar el diseño visual no toca la lógica, y cambiar la lógica no toca el JSX. Cada archivo tiene una razón única para cambiar.
+
+## Lo que encontrarás en esta sección
+
+| Documento | Cubre |
+|-----------|-------|
+| [Estructura de un componente](/docs/componentes/estructura-de-un-componente) | Cómo organizar los tres archivos y el ejemplo canónico `Counter` |
+| [Tipado de props](/docs/componentes/tipado-de-props) | Convenciones TypeScript: `interface` vs `type`, naming de hooks, `JSX.Element` |
+| [El controller hook](/docs/componentes/controller-hook) | Qué entra y sale del hook, qué nunca debe ir ahí |
+| [Cuándo dividir](/docs/componentes/cuando-dividir-un-componente) | Señales de que un componente está pidiendo ser partido |
+| [Controlado vs no controlado](/docs/componentes/controlado-vs-no-controlado) | Cuándo usar cada patrón y la regla del proyecto con RHF |
+
+<Callout variant="info">
+  Estos estándares aplican a todos los componentes de UI del proyecto. Los hooks de datos (que llaman a APIs o stores) siguen convenciones distintas documentadas en la sección **Hooks**.
+</Callout>

@@ -1,0 +1,124 @@
+---
+title: El controller hook
+description: Patrón useController — separar lógica de renderizado
+section: Componentes
+order: 13
+---
+
+# El controller hook
+
+El controller hook es el corazón del componente. Mientras `index.tsx` sabe *cómo se ve*, el controller hook sabe *cómo funciona*. El componente es "tonto"; el hook es "inteligente".
+
+## Naming
+
+```
+useController[NombreDelComponente]
+```
+
+Ejemplos: `useControllerSidebar`, `useControllerCounter`, `useControllerSearchInput`.
+
+El prefijo `useController` distingue estos hooks de los hooks de datos (`useUsers`, `useAuth`) y de los hooks de utilidad (`useDebounce`, `useLocalStorage`).
+
+## Qué va en el hook
+
+**Estado local**
+```typescript
+const [isOpen, setIsOpen] = useState(false)
+const [query, setQuery] = useState('')
+```
+
+**Efectos y sincronización**
+```typescript
+useEffect(() => {
+  if (autoFocus && inputRef.current) {
+    inputRef.current.focus()
+  }
+}, [autoFocus])
+```
+
+**Handlers de eventos**
+```typescript
+const handleKeyDown = useCallback((e: KeyboardEvent) => {
+  if (e.key === 'Escape') setIsOpen(false)
+}, [])
+```
+
+**Transformaciones de datos**
+```typescript
+const filteredItems = useMemo(
+  () => items.filter(item => item.label.toLowerCase().includes(query.toLowerCase())),
+  [items, query]
+)
+```
+
+**Lógica derivada**
+```typescript
+const isEmpty = filteredItems.length === 0
+const hasSelection = selectedIds.size > 0
+```
+
+## Qué NO va en el hook
+
+- JSX de ningún tipo.
+- Clases CSS o nombres de variantes visuales (eso es lógica de presentación).
+- Lógica que solo existe para decidir qué color mostrar.
+- Llamadas directas a APIs o fetching de datos — eso va en hooks de datos separados.
+
+```typescript
+// ❌ no hagas esto en el controller hook
+const buttonClass = isActive ? 'bg-blue-500' : 'bg-gray-200'
+return { buttonClass }
+
+// ✅ en cambio, retorna el estado y deja que el renderizado decida
+return { isActive }
+```
+
+## La regla del contrato
+
+El hook recibe exactamente los mismos datos que el componente recibe del padre (o un subconjunto), y retorna exactamente lo que el JSX necesita — ni más ni menos.
+
+```typescript
+// ✅ el hook recibe los props del componente (con defaults aplicados)
+export const useControllerCounter = ({
+  initialValue,
+  min,
+  max,
+  onChange,
+}: UseControllerCounterParams): UseControllerCounterReturn => {
+  // ...
+  return {
+    count,          // el renderizado lo muestra
+    canDecrement,   // el renderizado deshabilita el botón
+    canIncrement,
+    handleIncrement,
+    handleDecrement,
+    handleReset,
+  }
+}
+```
+
+Si el hook empieza a retornar cosas que el renderizado nunca usa, algo está mal.
+
+<Callout variant="warning">
+  Si el hook supera ~100 líneas o tiene más de 5-6 `useState` no relacionados, es una señal de que el componente debe dividirse. El hook refleja la complejidad del componente — si el hook es grande, el componente es demasiado grande.
+</Callout>
+
+## Hooks de UI vs. hooks de datos
+
+| Hook de UI (`useControllerX`) | Hook de datos (`useX`) |
+|-------------------------------|------------------------|
+| Maneja estado visual y handlers | Maneja fetching, cache, mutaciones |
+| Vive en la carpeta del componente | Vive en `src/hooks/` o `src/lib/` |
+| Solo lo usa su componente | Puede usarse en múltiples lugares |
+| No llama APIs directamente | Llama APIs, usa SWR/React Query |
+
+```typescript
+// en el controller hook: consume el hook de datos
+const { data: users, isLoading } = useUsers()
+
+// lógica de UI sobre los datos
+const filteredUsers = useMemo(
+  () => users?.filter(u => u.role === selectedRole) ?? [],
+  [users, selectedRole]
+)
+```
