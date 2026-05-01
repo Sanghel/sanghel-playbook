@@ -1,0 +1,42 @@
+---
+title: Formularios
+description: Sistema de formularios basado en React Hook Form y FieldDefinition
+section: Formularios
+order: 20
+---
+
+# Formularios
+
+El sistema de formularios del proyecto se construye sobre **React Hook Form** y un tipo central llamado `FieldDefinition`. La filosofía es que cada capa tiene una responsabilidad única y no invade la de las demás.
+
+## Filosofía
+
+Cuatro capas completamente separadas:
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|-----------------|
+| Definición del campo | `*FormFields.ts` | Declarar qué campos existen, sus tipos y validaciones |
+| Gestión de estado | `useForm` (en el padre) | Estado del formulario, errores, submit |
+| Renderizado de campos | `DynamicFormBuilder` | Recorrer los campos y delegar a los wrappers |
+| Componente de UI | `AppInput`, `AppSelect`... | Renderizar el campo y conectarlo a RHF |
+
+### Reglas que no se rompen
+
+- **El FormBuilder no sabe qué componentes de UI usa.** Elige el wrapper según el `type` del campo, pero no importa los componentes directamente en la lógica de negocio.
+- **El submit siempre ocurre en el padre.** El padre conoce el contexto: qué API llamar, qué hacer después del éxito, qué errores mostrar.
+- **El FormBuilder es un recorredor de campos, no un gestor de estado.** `useForm` se instancia en el padre y se pasa hacia abajo.
+- **Los componentes de UI son wrappers delgados.** Reciben `name` y `control` de RHF, renderizan el componente de UI y conectan los errores.
+
+## Lo que encontrarás en esta sección
+
+| Documento | Cubre |
+|-----------|-------|
+| [FieldDefinition](/docs/formularios/field-definition) | El tipo completo de un campo: propiedades, validaciones, hints de UI |
+| [DynamicFormBuilder](/docs/formularios/dynamic-form-builder) | Cómo recorre los campos y delega el renderizado |
+| [Wrapping de componentes UI](/docs/formularios/wrapping-componentes-ui) | El patrón `AppInput` / `AppSelect`: Controller + error display |
+| [Validación con Zod](/docs/formularios/validacion-con-zod) | `buildZodSchema`: construir el schema desde un array de `FieldDefinition` |
+| [Submit desde el padre](/docs/formularios/submit-desde-el-padre) | Por qué y cómo el submit siempre vive en el componente padre |
+
+<Callout variant="info">
+  Todos los formularios del proyecto siguen este patrón sin excepción. Un formulario que gestiona su propio submit o instancia `useForm` internamente viola la separación de responsabilidades.
+</Callout>
