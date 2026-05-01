@@ -1,0 +1,145 @@
+---
+title: Estructura de un componente
+description: Cómo organizar los archivos de un componente
+section: Componentes
+order: 11
+---
+
+# Estructura de un componente
+
+Cada componente vive en su propia carpeta con exactamente tres archivos:
+
+```
+MyComponent/
+├── index.tsx                    ← solo renderizado, sin lógica
+├── types.ts                     ← interfaces, props, tipos locales
+└── useControllerMyComponent.ts  ← todo el estado y lógica de negocio
+```
+
+## Reglas
+
+- `index.tsx` solo contiene JSX y la llamada al hook del controller. Sin `useState`, sin `useEffect`, sin lógica condicional de negocio.
+- `types.ts` exporta todas las interfaces del componente. Nada se define inline en `index.tsx`.
+- El hook `useController[NombreComponente]` encapsula: estado local, efectos, handlers, lógica de negocio. Retorna exactamente lo que el renderizado necesita.
+
+<Callout variant="tip">
+  El retorno del hook debe tiparse explícitamente siempre. Si no está tipado, el consumidor no sabe qué esperar sin leer la implementación.
+</Callout>
+
+## Ejemplo: Counter
+
+El ejemplo canónico del proyecto es un `Counter` con valor mínimo, máximo y callback de cambio.
+
+### types.ts
+
+```typescript
+export interface CounterProps {
+  initialValue?: number
+  min?: number
+  max?: number
+  onChange?: (value: number) => void
+}
+
+export interface UseControllerCounterParams {
+  initialValue: number
+  min: number
+  max: number
+  onChange?: (value: number) => void
+}
+
+export interface UseControllerCounterReturn {
+  count: number
+  canDecrement: boolean
+  canIncrement: boolean
+  handleIncrement: () => void
+  handleDecrement: () => void
+  handleReset: () => void
+}
+```
+
+### useControllerCounter.ts
+
+```typescript
+import { useState, useCallback } from 'react'
+import type { UseControllerCounterParams, UseControllerCounterReturn } from './types'
+
+export const useControllerCounter = ({
+  initialValue,
+  min,
+  max,
+  onChange,
+}: UseControllerCounterParams): UseControllerCounterReturn => {
+  const [count, setCount] = useState(initialValue)
+
+  const handleIncrement = useCallback(() => {
+    setCount(prev => {
+      const next = Math.min(prev + 1, max)
+      onChange?.(next)
+      return next
+    })
+  }, [max, onChange])
+
+  const handleDecrement = useCallback(() => {
+    setCount(prev => {
+      const next = Math.max(prev - 1, min)
+      onChange?.(next)
+      return next
+    })
+  }, [min, onChange])
+
+  const handleReset = useCallback(() => {
+    setCount(initialValue)
+    onChange?.(initialValue)
+  }, [initialValue, onChange])
+
+  return {
+    count,
+    canDecrement: count > min,
+    canIncrement: count < max,
+    handleIncrement,
+    handleDecrement,
+    handleReset,
+  }
+}
+```
+
+### index.tsx
+
+```typescript
+import type { JSX } from 'react'
+import type { CounterProps } from './types'
+import { useControllerCounter } from './useControllerCounter'
+
+export const Counter = ({
+  initialValue = 0,
+  min = 0,
+  max = 100,
+  onChange,
+}: CounterProps): JSX.Element => {
+  const {
+    count,
+    canDecrement,
+    canIncrement,
+    handleIncrement,
+    handleDecrement,
+    handleReset,
+  } = useControllerCounter({ initialValue, min, max, onChange })
+
+  return (
+    <div className="flex items-center gap-2">
+      <button onClick={handleDecrement} disabled={!canDecrement}>−</button>
+      <span>{count}</span>
+      <button onClick={handleIncrement} disabled={!canIncrement}>+</button>
+      <button onClick={handleReset}>Reset</button>
+    </div>
+  )
+}
+```
+
+## ¿Por qué no `React.FC`?
+
+El tipo `JSX.Element` como retorno explícito es preferido sobre `React.FC<Props>` porque:
+
+- No agrega `children` implícito al tipo de las props.
+- Es más preciso: documenta que el componente siempre retorna un elemento.
+- Es la convención actual de React — `React.FC` fue popular pero se aleja del modelo de funciones puras.

@@ -1,0 +1,108 @@
+---
+title: Tipado de props
+description: Convenciones de TypeScript para props, hooks y tipos locales
+section: Componentes
+order: 12
+---
+
+# Tipado de props
+
+TypeScript es una herramienta de documentación tanto como de seguridad. Los tipos bien escritos hacen que el componente sea autoexplicativo sin necesidad de comentarios.
+
+## Reglas
+
+**Usa `interface`, no `type`, para props de componentes.**
+
+```typescript
+// ✅ correcto
+export interface ButtonProps {
+  label: string
+  onClick: () => void
+  disabled?: boolean
+}
+
+// ❌ evitar para props de componentes
+export type ButtonProps = {
+  label: string
+  onClick: () => void
+  disabled?: boolean
+}
+```
+
+`interface` es extendible y produce mensajes de error más legibles. Usa `type` para uniones, intersecciones o aliases de tipos primitivos.
+
+**Tipado explícito del retorno del hook.**
+
+El retorno del controller hook siempre lleva un tipo explícito. Nunca confíes en la inferencia aquí:
+
+```typescript
+// ✅ correcto — el consumidor sabe exactamente qué esperar
+export const useControllerCounter = (
+  params: UseControllerCounterParams
+): UseControllerCounterReturn => { ... }
+
+// ❌ evitar — la inferencia se rompe si la implementación cambia
+export const useControllerCounter = (params: UseControllerCounterParams) => { ... }
+```
+
+**Tres interfaces separadas por componente.**
+
+Cada componente necesita al menos tres interfaces bien separadas:
+
+```typescript
+// Props del componente (lo que recibe desde el padre)
+export interface CounterProps { ... }
+
+// Params del hook (generalmente igual a CounterProps con defaults aplicados)
+export interface UseControllerCounterParams { ... }
+
+// Retorno del hook (lo que el renderizado consume)
+export interface UseControllerCounterReturn { ... }
+```
+
+**Retorno del componente tipado como `JSX.Element`.**
+
+```typescript
+export const Counter = (props: CounterProps): JSX.Element => { ... }
+```
+
+Nunca `React.FC`, nunca sin anotar el retorno.
+
+## Naming convention
+
+| Elemento | Patrón | Ejemplo |
+|----------|--------|---------|
+| Props del componente | `[Nombre]Props` | `CounterProps` |
+| Params del hook | `UseController[Nombre]Params` | `UseControllerCounterParams` |
+| Retorno del hook | `UseController[Nombre]Return` | `UseControllerCounterReturn` |
+
+## PropsTable como documentación viva
+
+El componente `PropsTable` permite documentar props directamente en MDX. Las siguientes son las props del `Counter` de ejemplo:
+
+**CounterProps**
+
+| Prop | Tipo | Requerido | Default | Descripción |
+|------|------|-----------|---------|-------------|
+| `initialValue` | `number` | No | `0` | Valor inicial del contador |
+| `min` | `number` | No | `0` | Valor mínimo permitido |
+| `max` | `number` | No | `100` | Valor máximo permitido |
+| `onChange` | `(value: number) => void` | No | — | Callback llamado con el nuevo valor |
+
+<Callout variant="tip">
+  Si `UseControllerParams` y `ComponentProps` son idénticos, unifícalos en una sola interface y reutilízala. Solo sepáralos cuando el hook necesite los valores con defaults ya aplicados.
+</Callout>
+
+## Tipos locales vs. exportados
+
+No todo tipo en `types.ts` debe exportarse. Si un tipo solo se usa internamente en el hook, defínelo local al archivo. Solo exporta lo que el consumidor del componente necesita conocer.
+
+```typescript
+// types.ts
+
+// exportado — el padre lo necesita para pasar props
+export interface CounterProps { ... }
+
+// local — solo lo necesita el hook
+type CounterAction = 'increment' | 'decrement' | 'reset'
+```

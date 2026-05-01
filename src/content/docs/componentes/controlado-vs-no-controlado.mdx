@@ -1,0 +1,125 @@
+---
+title: Controlado vs no controlado
+description: Cuándo y cómo usar cada patrón
+section: Componentes
+order: 15
+---
+
+# Controlado vs no controlado
+
+La diferencia entre ambos patrones está en quién posee el estado: el padre o el componente mismo.
+
+## Componente no controlado
+
+El estado vive dentro del componente. El padre lo instancia y lo olvida.
+
+```typescript
+// El componente gestiona su propio estado
+export const Counter = ({ initialValue = 0 }: CounterProps): JSX.Element => {
+  const { count, handleIncrement, handleDecrement } = useControllerCounter({
+    initialValue,
+    min: 0,
+    max: 100,
+  })
+
+  return (
+    <div>
+      <button onClick={handleDecrement}>−</button>
+      <span>{count}</span>
+      <button onClick={handleIncrement}>+</button>
+    </div>
+  )
+}
+
+// El padre no controla el valor
+<Counter initialValue={5} />
+```
+
+**Cuándo usarlo:** componentes de UI autónomos sin necesidad de sincronización externa. Tooltips, dropdowns de decoración, contadores de demostración.
+
+## Componente controlado
+
+El estado vive en el padre. El componente recibe `value` y notifica cambios con `onChange`.
+
+```typescript
+export interface SearchInputProps {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}
+
+export const SearchInput = ({
+  value,
+  onChange,
+  placeholder,
+}: SearchInputProps): JSX.Element => {
+  const { handleChange, handleClear } = useControllerSearchInput({ onChange })
+
+  return (
+    <div className="relative">
+      <input
+        value={value}
+        onChange={handleChange}
+        placeholder={placeholder}
+      />
+      {value && (
+        <button onClick={handleClear}>✕</button>
+      )}
+    </div>
+  )
+}
+
+// El padre controla el estado
+const [query, setQuery] = useState('')
+<SearchInput value={query} onChange={setQuery} />
+```
+
+**Cuándo usarlo:** cuando el padre necesita conocer o modificar el estado del componente, o cuando el estado debe sincronizarse con otros elementos de la UI.
+
+## La regla del proyecto con React Hook Form
+
+Los componentes de formulario **siempre son controlados** cuando se usan con RHF. Esto significa que aceptan `value` y `onChange` como props, y se registran con el `Controller` de RHF.
+
+```typescript
+// ✅ componente de formulario controlado
+export interface SelectFieldProps {
+  value: string
+  onChange: (value: string) => void
+  options: SelectOption[]
+  label: string
+  error?: string
+}
+
+// Uso con React Hook Form
+<Controller
+  name="category"
+  control={control}
+  render={({ field }) => (
+    <SelectField
+      value={field.value}
+      onChange={field.onChange}
+      options={categoryOptions}
+      label="Categoría"
+      error={errors.category?.message}
+    />
+  )}
+/>
+```
+
+<Callout variant="warning">
+  No uses `register` de RHF directamente en componentes de UI personalizados. Usa siempre `Controller` y el patrón controlado. `register` está pensado para inputs HTML nativos, no para componentes con comportamiento propio.
+</Callout>
+
+## Patrón mixto: valor inicial no controlado
+
+Algunos componentes aceptan tanto un `value` externo como un estado interno como fallback. Esto es el patrón "uncontrolled with initial value":
+
+```typescript
+export interface RatingProps {
+  value?: number        // si se pasa, el componente es controlado
+  defaultValue?: number // si no se pasa value, usa este como estado inicial
+  onChange?: (value: number) => void
+}
+```
+
+Úsalo con cuidado. Mezclar ambos patrones en un mismo componente complica el comportamiento esperado. Cuando tengas duda, opta por controlado.

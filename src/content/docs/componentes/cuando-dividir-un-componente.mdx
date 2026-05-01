@@ -1,0 +1,80 @@
+---
+title: Cuándo dividir un componente
+description: Señales para saber cuándo extraer o agrupar componentes
+section: Componentes
+order: 14
+---
+
+# Cuándo dividir un componente
+
+Dividir un componente no siempre mejora el código. La pregunta correcta no es "¿puede separarse?" sino "¿tiene sentido conceptual propio?".
+
+## Señales de que SÍ debe dividirse
+
+**Más de una responsabilidad visible**
+
+Si el JSX de `index.tsx` describe dos cosas distintas — por ejemplo, un formulario de búsqueda Y una lista de resultados — probablemente son dos componentes.
+
+```
+// 🟡 sospechoso: ¿esto es un SearchInput o un SearchPanel?
+return (
+  <div>
+    <input ... />       {/* lógica de búsqueda */}
+    <ul>                {/* lógica de resultados */}
+      {results.map(...)}
+    </ul>
+    <Pagination ... />  {/* lógica de paginación */}
+  </div>
+)
+```
+
+**El JSX supera ~80 líneas**
+
+Es una heurística, no una regla absoluta. Pero si el archivo es difícil de leer de un vistazo, el componente probablemente hace demasiado.
+
+**Lógica condicional compleja y repetida**
+
+Si aparece el mismo bloque `if/else` en más de un lugar dentro del JSX, esa condición debería vivir en un componente propio.
+
+**Más de 2-3 `useState` sin relación entre sí**
+
+```typescript
+// 🟡 señal de alerta: estos estados no están relacionados
+const [isMenuOpen, setIsMenuOpen] = useState(false)
+const [formData, setFormData] = useState({ name: '', email: '' })
+const [uploadProgress, setUploadProgress] = useState(0)
+```
+
+Si el hook maneja estado de un menú, un formulario y una subida de archivo al mismo tiempo, hay tres componentes mezclados.
+
+**Se reutiliza en más de un lugar**
+
+Si copias y pegas JSX entre componentes, extrae lo que se repite. El criterio de reutilización es válido cuando el código que se repite también tiene comportamiento propio.
+
+## Señales de que NO debe dividirse
+
+**Solo para evitar repetición sin lógica propia**
+
+Crear un componente `<Label>` que solo renderiza `<label className="text-sm font-medium">` no aporta nada que una clase de Tailwind no resuelva. La abstracción prematura crea indirección sin beneficio.
+
+**Si el "componente" no tiene props propias**
+
+Un componente que siempre renderiza lo mismo y no acepta datos externos es un fragmento de JSX, no un componente.
+
+**Si la división complica más que simplifica**
+
+Si para extraer el componente necesitas pasar 6 props "hacia arriba" al padre, la abstracción está en el lugar equivocado. Revisa si la lógica también debe moverse.
+
+## Cómo decidir en la práctica
+
+Hazte estas preguntas antes de dividir:
+
+1. ¿Tiene un nombre claro que describa exactamente lo que hace?
+2. ¿Tiene props propias que lo hagan reutilizable o configurable?
+3. ¿Si lo extraigo, el componente padre se lee mejor?
+
+Si las tres respuestas son sí, divide. Si no, espera a que la necesidad sea real.
+
+<Callout variant="info">
+  La regla de oro: extrae cuando tengas evidencia de que la separación mejora la legibilidad o la reutilización, no por anticipar futuros cambios. YAGNI aplica a los componentes igual que al código.
+</Callout>
