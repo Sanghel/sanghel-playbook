@@ -1,0 +1,138 @@
+---
+title: Wrapping de componentes UI
+description: El patrón AppInput / AppSelect — conectar componentes de UI a React Hook Form
+section: Formularios
+order: 23
+---
+
+# Wrapping de componentes UI
+
+Los componentes como `AppInput`, `AppSelect` o `AppTextarea` son wrappers delgados. Toman un componente de UI (Ant Design, Radix, etc.) y lo conectan a **React Hook Form** vía `Controller`. Son el puente entre el sistema de formularios y la librería de UI.
+
+## Props del wrapper
+
+```typescript
+type FieldWrapperProps = {
+  field: FieldDefinition
+  control: Control
+  error?: FieldError
+}
+```
+
+Todos los wrappers reciben la misma interfaz: el campo (`field`), el control de RHF (`control`) y el error si lo hay.
+
+## El patrón: Controller
+
+El wrapper usa `Controller` de RHF para registrar el campo y conectar el valor:
+
+```typescript
+import { Controller } from 'react-hook-form'
+import type { Control, FieldError } from 'react-hook-form'
+import type { FieldDefinition } from '@/types/forms'
+
+type Props = {
+  field: FieldDefinition
+  control: Control
+  error?: FieldError
+}
+
+export const AppInput = ({ field, control, error }: Props): JSX.Element => {
+  return (
+    <Controller
+      name={field.name}
+      control={control}
+      render={({ field: rhfField }) => (
+        <div>
+          <label htmlFor={field.name}>{field.label}</label>
+          <input
+            {...rhfField}
+            id={field.name}
+            type={field.type === 'password' ? 'password' : 'text'}
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            autoComplete={field.uiHints?.autoComplete}
+          />
+          {error && <span role="alert">{error.message}</span>}
+        </div>
+      )}
+    />
+  )
+}
+```
+
+## Por qué Controller y no register
+
+`register` funciona bien para inputs nativos HTML, pero los componentes de UI de librerías (Ant Design, Radix, etc.) exponen interfaces no estándar — no tienen los eventos `onChange`/`onBlur` que `register` espera. `Controller` resuelve esto: proporciona `field.onChange`, `field.value` y `field.onBlur` que se pueden pasar al componente independientemente de su API.
+
+```typescript
+// Con una librería de UI que espera value y onChange propios
+<Controller
+  name={field.name}
+  control={control}
+  render={({ field: rhfField }) => (
+    <Select
+      value={rhfField.value}
+      onChange={rhfField.onChange}
+      onBlur={rhfField.onBlur}
+      options={field.catalogueOptions}
+    />
+  )}
+/>
+```
+
+## Error display
+
+El error viene de `methods.formState.errors[field.name]` en el `DynamicFormBuilder` y se pasa como prop `error`. El wrapper decide cómo mostrarlo. El estándar del proyecto es mostrarlo debajo del input con `role="alert"` para accesibilidad.
+
+```typescript
+{error && (
+  <span role="alert" className="field-error">
+    {error.message}
+  </span>
+)}
+```
+
+## AppSelect: opciones dinámicas
+
+Cuando el campo es de tipo `catalog`, `select` o `multiselect`, el wrapper accede a `field.catalogueOptions`:
+
+```typescript
+export const AppSelect = ({ field, control, error }: Props): JSX.Element => {
+  return (
+    <Controller
+      name={field.name}
+      control={control}
+      render={({ field: rhfField }) => (
+        <div>
+          <label htmlFor={field.name}>{field.label}</label>
+          <select
+            {...rhfField}
+            id={field.name}
+            disabled={field.disabled}
+            multiple={field.type === 'multiselect'}
+          >
+            <option value="">-- Selecciona --</option>
+            {field.catalogueOptions?.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {error && <span role="alert">{error.message}</span>}
+        </div>
+      )}
+    />
+  )
+}
+```
+
+## Reglas del wrapper
+
+- Solo hace renderizado: no tiene estado propio, no llama a APIs.
+- Recibe `control`, no `methods` completo — el wrapper no necesita acceso a `handleSubmit`, `reset` ni `setError`.
+- El error lo muestra, no lo genera. La validación ocurre en el schema de Zod.
+- Nunca instancia `useForm`.
+
+<Callout variant="tip">
+  Si un wrapper necesita lógica más compleja (cargar opciones async, transformar el valor antes de pasarlo a RHF), extrae esa lógica a un hook `useControllerAppSelect`. El wrapper sigue siendo solo renderizado.
+</Callout>
