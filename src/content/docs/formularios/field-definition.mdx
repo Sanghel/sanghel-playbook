@@ -1,0 +1,164 @@
+---
+title: FieldDefinition
+description: El contrato de un campo de formulario
+section: Formularios
+order: 21
+---
+
+# FieldDefinition
+
+`FieldDefinition` es el tipo central del sistema de formularios. Es el contrato que describe qué es un campo: su tipo, sus validaciones, sus opciones de UI y su posición en el grid.
+
+## Tipos de soporte
+
+```typescript
+export type CatalogueOption = {
+  value: string | number
+  label: string
+}
+
+export type FieldTypeName =
+  | 'text'
+  | 'number'
+  | 'password'
+  | 'textarea'
+  | 'catalog'
+  | 'select'
+  | 'multiselect'
+  | 'checkbox'
+  | 'radio'
+
+export type FieldUiIcon = 'mail' | 'lock' | 'user' | 'phone' | 'search'
+
+export type FieldUiHints = {
+  iconName?: FieldUiIcon
+  autoComplete?: string
+  size?: 'small' | 'middle' | 'large'
+}
+
+export type ModelName = {
+  id: number
+  name: string
+  keyword: string
+  createdAt: string
+  allowRelationships: boolean
+}
+
+export type FieldValidations = {
+  required?: boolean
+  max_chars?: number
+  min_chars?: number
+  unique?: boolean
+  to_upper_case?: boolean
+}
+```
+
+## El tipo FieldDefinition
+
+```typescript
+export type FieldDefinition = {
+  id: number
+  name: string
+  label: string
+  type: FieldTypeName
+  placeholder?: string
+  defaultValue?: string | number | boolean
+  disabled?: boolean
+  hidden?: boolean
+  gridCols?: number
+  validations?: FieldValidations
+  uiHints?: FieldUiHints
+  catalogueOptions?: CatalogueOption[]
+  modelName?: ModelName
+}
+```
+
+## Propiedades
+
+### Identidad del campo
+
+| Propiedad | Tipo | Descripción |
+|-----------|------|-------------|
+| `id` | `number` | Identificador único del campo. Se usa como `key` en el renderizado. |
+| `name` | `string` | Nombre del campo en el formulario. Debe coincidir con la clave en `defaultValues` de `useForm`. |
+| `label` | `string` | Texto visible que acompaña el input. |
+| `type` | `FieldTypeName` | Determina qué wrapper de UI se renderiza. |
+
+### Comportamiento
+
+| Propiedad | Tipo | Descripción |
+|-----------|------|-------------|
+| `placeholder` | `string?` | Texto de placeholder del input. |
+| `defaultValue` | `string \| number \| boolean?` | Valor inicial del campo. Se usa cuando no se pasa en `defaultValues` de `useForm`. |
+| `disabled` | `boolean?` | Si es `true`, el campo se renderiza deshabilitado. |
+| `hidden` | `boolean?` | Si es `true`, el campo no se renderiza. Útil para campos condicionales. |
+| `gridCols` | `number?` | Cuántas columnas ocupa el campo en el grid del formulario. Por defecto, 1. |
+
+### Validaciones
+
+`validations` recibe un objeto `FieldValidations` que `buildZodSchema` convierte en reglas de Zod.
+
+```typescript
+validations: {
+  required: true,
+  min_chars: 8,
+  max_chars: 100,
+}
+```
+
+### Hints de UI
+
+`uiHints` permite pasar información de presentación sin contaminar la lógica del campo.
+
+```typescript
+uiHints: {
+  iconName: 'mail',
+  autoComplete: 'email',
+  size: 'large',
+}
+```
+
+### Opciones de catálogo
+
+Para campos de tipo `catalog`, `select`, `multiselect` o `radio`, se usa `catalogueOptions`:
+
+```typescript
+catalogueOptions: [
+  { value: 'mx', label: 'México' },
+  { value: 'co', label: 'Colombia' },
+  { value: 'ar', label: 'Argentina' },
+]
+```
+
+Para campos de tipo `catalog` que cargan opciones desde un modelo de datos dinámico, se usa `modelName` en lugar de `catalogueOptions`.
+
+## Ejemplo completo
+
+```typescript
+// loginFormFields.ts
+import type { FieldDefinition } from '@/types/forms'
+
+export const loginFormFields: FieldDefinition[] = [
+  {
+    id: 1,
+    name: 'identifier',
+    label: 'Correo electrónico',
+    type: 'text',
+    placeholder: 'usuario@ejemplo.com',
+    uiHints: { iconName: 'mail', autoComplete: 'email' },
+    validations: { required: true },
+  },
+  {
+    id: 2,
+    name: 'password',
+    label: 'Contraseña',
+    type: 'password',
+    uiHints: { iconName: 'lock', autoComplete: 'current-password' },
+    validations: { required: true, min_chars: 8 },
+  },
+]
+```
+
+<Callout variant="tip">
+  El array de `FieldDefinition` es la única fuente de verdad del formulario. No definas validaciones en `useForm` si ya están en `validations` — `buildZodSchema` las convierte automáticamente.
+</Callout>
