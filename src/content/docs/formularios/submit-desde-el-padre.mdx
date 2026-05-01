@@ -1,0 +1,100 @@
+---
+title: Submit desde el padre
+description: Por qué y cómo el submit siempre vive en el componente padre
+section: Formularios
+order: 25
+---
+
+# Submit desde el padre
+
+El submit siempre ocurre en el padre. No en el `DynamicFormBuilder`, no en los wrappers de campo, no en un hook compartido. Solo en el padre.
+
+## Por qué
+
+El padre es el único que conoce el contexto completo:
+
+- Qué API llamar y con qué parámetros
+- A dónde redirigir después del éxito
+- Qué toast o notificación mostrar
+- Qué errores de servidor mapear a qué campos
+
+Si el submit viviera dentro del builder, este necesitaría conocer el contexto de negocio de cada formulario. Dejaría de ser un recorredor de campos genérico y se convertiría en un componente acoplado a cada caso de uso.
+
+## Patrón completo: formulario de login
+
+```typescript
+// LoginPage — el padre
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { buildZodSchema } from '@/lib/buildZodSchema'
+import { DynamicFormBuilder } from '@/components/DynamicFormBuilder'
+import { loginFormFields } from './loginFormFields'
+
+const schema = buildZodSchema(loginFormFields)
+type LoginFormValues = z.infer<typeof schema>
+
+export const LoginPage = (): JSX.Element => {
+  const methods = useForm<LoginFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { identifier: '', password: '' },
+  })
+
+  const handleSubmit = methods.handleSubmit(async (data) => {
+    try {
+      await loginService(data)
+      router.push('/dashboard')
+    } catch (error) {
+      // Los errores de API se setean con setError para que aparezcan en el campo
+      methods.setError('identifier', {
+        type: 'server',
+        message: 'Credenciales incorrectas',
+      })
+    }
+  })
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <DynamicFormBuilder fields={loginFormFields} methods={methods} cols={1} />
+      <button type="submit" disabled={methods.formState.isSubmitting}>
+        {methods.formState.isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
+      </button>
+    </form>
+  )
+}
+```
+
+## Reglas
+
+| Regla | Motivo |
+|-------|--------|
+| `useForm` siempre se instancia en el padre | El padre controla el ciclo de vida del formulario |
+| `methods` se pasa al `DynamicFormBuilder` | El builder necesita `control` y `formState.errors` |
+| El `<form>` con `onSubmit` vive en el padre | El submit es responsabilidad del padre, no del builder |
+| `methods.handleSubmit` solo se llama en el padre | Garantiza que la lógica de negocio no se filtre al builder |
+| Los errores de servidor se setean con `methods.setError` | Permite mostrar errores de API en los campos específicos |
+
+## Estado durante el submit
+
+`formState.isSubmitting` es `true` mientras el handler async está en ejecución. Úsalo para deshabilitar el botón y evitar doble submit:
+
+```typescript
+<button type="submit" disabled={methods.formState.isSubmitting}>
+  {methods.formState.isSubmitting ? 'Guardando...' : 'Guardar'}
+</button>
+```
+
+## Reset después del submit
+
+Si el formulario debe limpiarse después de un submit exitoso:
+
+```typescript
+const handleSubmit = methods.handleSubmit(async (data) => {
+  await createRecord(data)
+  methods.reset()
+})
+```
+
+<Callout variant="warning">
+  Nunca llames `methods.handleSubmit` dentro del `DynamicFormBuilder` ni de los wrappers de campo. Si lo necesitas en un lugar distinto al padre, es una señal de que la separación de responsabilidades está rota.
+</Callout>
