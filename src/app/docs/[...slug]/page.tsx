@@ -20,6 +20,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${doc.frontmatter.title} — Sanghel Playbook`,
     description: doc.frontmatter.description,
+    openGraph: {
+      title: doc.frontmatter.title,
+      description: doc.frontmatter.description,
+      type: 'article',
+    },
   }
 }
 
