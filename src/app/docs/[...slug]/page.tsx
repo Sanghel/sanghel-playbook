@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import { getDocBySlug, getAllDocs } from '@/lib/docs'
 import { renderMDX, extractToc } from '@/lib/mdx'
+import { TableOfContents } from '@/components/TableOfContents'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 
 interface PageProps {
   params: Promise<{ slug: string[] }>
@@ -55,30 +55,7 @@ export default async function DocPage({ params }: PageProps) {
         </div>
       </article>
 
-      {toc.length > 0 && (
-        <aside className="hidden xl:block w-52 shrink-0">
-          <div className="sticky top-20">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              On this page
-            </p>
-            <ul className="flex flex-col gap-1.5">
-              {toc.map((item) => (
-                <li
-                  key={item.id}
-                  style={{ paddingLeft: `${(item.level - 1) * 12}px` }}
-                >
-                  <Link
-                    href={`#${item.id}`}
-                    className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
-      )}
+      <TableOfContents items={toc} />
     </div>
   )
 }
