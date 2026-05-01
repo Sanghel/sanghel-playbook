@@ -4,7 +4,8 @@ import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { Header } from '@/components/Header'
 import { Sidebar } from '@/components/Sidebar'
-import { getNavigation } from '@/lib/docs'
+import { SearchModal } from '@/components/SearchModal'
+import { getNavigation, getAllDocs } from '@/lib/docs'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -23,6 +24,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const sections = getNavigation()
+  const searchDocs = getAllDocs().map((doc) => ({
+    title: doc.frontmatter.title,
+    description: doc.frontmatter.description ?? '',
+    href: `/docs/${doc.slug.join('/')}`,
+  }))
 
   return (
     <html
@@ -41,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </main>
             </div>
           </div>
+          <SearchModal docs={searchDocs} />
         </ThemeProvider>
       </body>
     </html>

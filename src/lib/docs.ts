@@ -57,6 +57,23 @@ export function getDocBySlug(slug: string[]): Doc | null {
   return { slug, frontmatter: data as DocFrontmatter, content }
 }
 
+export function getAdjacentDocs(slug: string[]): {
+  prev: { title: string; href: string } | null
+  next: { title: string; href: string } | null
+} {
+  const docs = getAllDocs()
+  const currentHref = `/docs/${slug.join('/')}`
+  const index = docs.findIndex((doc) => `/docs/${doc.slug.join('/')}` === currentHref)
+
+  const prev = index > 0 ? docs[index - 1] : null
+  const next = index < docs.length - 1 ? docs[index + 1] : null
+
+  return {
+    prev: prev ? { title: prev.frontmatter.title, href: `/docs/${prev.slug.join('/')}` } : null,
+    next: next ? { title: next.frontmatter.title, href: `/docs/${next.slug.join('/')}` } : null,
+  }
+}
+
 export function getNavigation(): NavSection[] {
   const files = getMdxFiles(DOCS_DIR)
   const sections: Map<string, NavItem[]> = new Map()
