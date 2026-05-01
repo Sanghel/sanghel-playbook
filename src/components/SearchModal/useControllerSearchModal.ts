@@ -10,8 +10,7 @@ export function useControllerSearchModal(docs: SearchDoc[]) {
   const [results, setResults] = useState<SearchDoc[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const fuse = useRef(
+  const fuseRef = useRef(
     new Fuse(docs, {
       keys: ['title', 'description'],
       threshold: 0.3,
@@ -19,13 +18,22 @@ export function useControllerSearchModal(docs: SearchDoc[]) {
     })
   )
 
-  const open = useCallback(() => setIsOpen(true), [])
   const close = useCallback(() => {
     setIsOpen(false)
     setQuery('')
     setResults([])
     setActiveIndex(0)
   }, [])
+
+  function handleQueryChange(newQuery: string) {
+    setQuery(newQuery)
+    setActiveIndex(0)
+    if (!newQuery.trim()) {
+      setResults([])
+      return
+    }
+    setResults(fuseRef.current.search(newQuery).map((r) => r.item))
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -53,17 +61,6 @@ export function useControllerSearchModal(docs: SearchDoc[]) {
     }
   }, [isOpen])
 
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([])
-      setActiveIndex(0)
-      return
-    }
-    const hits = fuse.current.search(query).map((r) => r.item)
-    setResults(hits)
-    setActiveIndex(0)
-  }, [query])
-
   function handleKeyboardNav(e: React.KeyboardEvent) {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -82,9 +79,8 @@ export function useControllerSearchModal(docs: SearchDoc[]) {
     results,
     activeIndex,
     inputRef,
-    open,
     close,
-    setQuery,
+    handleQueryChange,
     handleKeyboardNav,
   }
 }

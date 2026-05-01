@@ -5,7 +5,7 @@ import { useControllerSearchModal } from './useControllerSearchModal'
 import type { SearchModalProps } from './types'
 
 export function SearchModal({ docs }: SearchModalProps) {
-  const { isOpen, query, results, activeIndex, inputRef, close, setQuery, handleKeyboardNav } =
+  const { isOpen, query, results, activeIndex, inputRef, close, handleQueryChange, handleKeyboardNav } =
     useControllerSearchModal(docs)
 
   if (!isOpen) return null
@@ -37,7 +37,7 @@ export function SearchModal({ docs }: SearchModalProps) {
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             onKeyDown={handleKeyboardNav}
             placeholder="Buscar documentos..."
             className="flex-1 py-4 bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none"
