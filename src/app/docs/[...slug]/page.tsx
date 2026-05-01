@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
-import { getDocBySlug, getAllDocs } from '@/lib/docs'
+import { getDocBySlug, getAllDocs, getAdjacentDocs } from '@/lib/docs'
 import { renderMDX, extractToc } from '@/lib/mdx'
 import { TableOfContents } from '@/components/TableOfContents'
+import { DocNavigation } from '@/components/DocNavigation'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -36,6 +37,7 @@ export default async function DocPage({ params }: PageProps) {
 
   const { content } = await renderMDX(doc.content)
   const toc = extractToc(doc.content)
+  const { prev, next } = getAdjacentDocs(slug)
 
   return (
     <div className="flex gap-8 w-full max-w-5xl mx-auto px-6 py-10">
@@ -53,6 +55,7 @@ export default async function DocPage({ params }: PageProps) {
         <div className="prose prose-zinc dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-code:before:content-none prose-code:after:content-none">
           {content}
         </div>
+        <DocNavigation prev={prev} next={next} />
       </article>
 
       <TableOfContents items={toc} />
