@@ -1,0 +1,126 @@
+---
+title: Validación con Zod
+description: buildZodSchema — construir un schema de validación desde FieldDefinition
+section: Formularios
+order: 24
+---
+
+# Validación con Zod
+
+La validación del formulario se genera automáticamente desde el array de `FieldDefinition`. La función `buildZodSchema` recorre los campos, lee sus `validations` y construye un schema de Zod. Esto garantiza que la validación y la definición del campo estén siempre sincronizadas.
+
+## buildZodSchema
+
+```typescript
+import { z } from 'zod'
+import type { FieldDefinition } from '@/types/forms'
+
+export function buildZodSchema(fields: FieldDefinition[]): z.ZodObject<z.ZodRawShape> {
+  const shape: z.ZodRawShape = {}
+
+  for (const field of fields) {
+    const { name, validations } = field
+
+    if (!validations) {
+      shape[name] = z.string().optional()
+      continue
+    }
+
+    let schema: z.ZodTypeAny = z.string()
+
+    if (validations.max_chars) {
+      schema = (schema as z.ZodString).max(
+        validations.max_chars,
+        `Máximo ${validations.max_chars} caracteres`
+      )
+    }
+
+    if (validations.min_chars) {
+      schema = (schema as z.ZodString).min(
+        validations.min_chars,
+        `Mínimo ${validations.min_chars} caracteres`
+      )
+    }
+
+    if (!validations.required) {
+      schema = schema.optional()
+    } else {
+      schema = (schema as z.ZodString).min(1, `${field.label} es requerido`)
+    }
+
+    shape[name] = schema
+  }
+
+  return z.object(shape)
+}
+```
+
+## Cómo funciona
+
+Para cada campo en `fields`:
+
+1. Si no tiene `validations`, se registra como `z.string().optional()`.
+2. Si tiene `max_chars`, aplica `.max()` con mensaje de error.
+3. Si tiene `min_chars`, aplica `.min()` con mensaje de error.
+4. Si `required` es `false` o no está definido, marca el campo como `.optional()`.
+5. Si `required` es `true`, aplica `.min(1)` para rechazar strings vacíos.
+
+## Conectarlo a useForm con zodResolver
+
+```typescript
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { buildZodSchema } from '@/lib/buildZodSchema'
+import { loginFormFields } from './loginFormFields'
+
+const schema = buildZodSchema(loginFormFields)
+
+const methods = useForm({
+  resolver: zodResolver(schema),
+  defaultValues: {
+    identifier: '',
+    password: '',
+  },
+})
+```
+
+`zodResolver` traduce los errores de Zod al formato que RHF expone en `formState.errors`. Los mensajes que definiste en `buildZodSchema` (`'Mínimo 8 caracteres'`) son los mismos que aparecen en `error.message` dentro de los wrappers.
+
+## Inferir el tipo de los valores del formulario
+
+Zod puede inferir el tipo TypeScript del schema generado. Úsalo para tipar `defaultValues` y el argumento del handler de submit:
+
+```typescript
+import { z } from 'zod'
+
+const schema = buildZodSchema(loginFormFields)
+type LoginFormValues = z.infer<typeof schema>
+// => { identifier: string; password: string }
+
+const handleSubmit = methods.handleSubmit(async (data: LoginFormValues) => {
+  await loginService(data)
+})
+```
+
+## Extender el schema con validaciones custom
+
+Si un campo necesita una validación que `FieldValidations` no cubre (formato de email, confirmación de contraseña, etc.), extiende el schema después de crearlo:
+
+```typescript
+const baseSchema = buildZodSchema(fields)
+
+const schema = baseSchema.extend({
+  email: z.string().email('Formato de email inválido'),
+  passwordConfirm: z.string(),
+}).refine(
+  (data) => data.password === data.passwordConfirm,
+  {
+    message: 'Las contraseñas no coinciden',
+    path: ['passwordConfirm'],
+  }
+)
+```
+
+<Callout variant="warning">
+  No pongas validaciones en `useForm` directamente (`rules` en `Controller`). Toda la validación debe vivir en el schema de Zod para que haya una sola fuente de verdad.
+</Callout>
