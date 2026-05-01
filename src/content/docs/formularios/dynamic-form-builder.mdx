@@ -1,0 +1,122 @@
+---
+title: DynamicFormBuilder
+description: El recorredor de campos — renderiza cada FieldDefinition en su wrapper de UI
+section: Formularios
+order: 22
+---
+
+# DynamicFormBuilder
+
+`DynamicFormBuilder` recorre un array de `FieldDefinition` y renderiza cada campo en el wrapper de UI correspondiente. No gestiona estado, no valida, no llama a APIs. Su única responsabilidad es el renderizado.
+
+## Props
+
+```typescript
+type DynamicFormBuilderProps = {
+  fields: FieldDefinition[]
+  methods: UseFormReturn
+  cols?: number
+}
+```
+
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `fields` | `FieldDefinition[]` | Array de campos a renderizar, en el orden declarado |
+| `methods` | `UseFormReturn` | El objeto retornado por `useForm`, instanciado en el padre |
+| `cols` | `number?` | Número de columnas del grid. Por defecto, `1` |
+
+## Implementación
+
+```typescript
+import type { FieldDefinition } from '@/types/forms'
+import type { UseFormReturn } from 'react-hook-form'
+import { AppInput } from '@/components/AppInput'
+import { AppSelect } from '@/components/AppSelect'
+import { AppTextarea } from '@/components/AppTextarea'
+import { AppCheckbox } from '@/components/AppCheckbox'
+
+type Props = {
+  fields: FieldDefinition[]
+  methods: UseFormReturn
+  cols?: number
+}
+
+const fieldMap: Record<string, React.ComponentType<FieldWrapperProps>> = {
+  text: AppInput,
+  number: AppInput,
+  password: AppInput,
+  textarea: AppTextarea,
+  catalog: AppSelect,
+  select: AppSelect,
+  multiselect: AppSelect,
+  checkbox: AppCheckbox,
+  radio: AppSelect,
+}
+
+export const DynamicFormBuilder = ({ fields, methods, cols = 1 }: Props): JSX.Element => {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '16px' }}>
+      {fields
+        .filter((field) => !field.hidden)
+        .map((field) => {
+          const Component = fieldMap[field.type]
+          if (!Component) return null
+
+          return (
+            <div
+              key={field.id}
+              style={{ gridColumn: field.gridCols ? `span ${field.gridCols}` : undefined }}
+            >
+              <Component
+                field={field}
+                control={methods.control}
+                error={methods.formState.errors[field.name]}
+              />
+            </div>
+          )
+        })}
+    </div>
+  )
+}
+```
+
+## Qué hace y qué no hace
+
+### Hace
+- Filtra los campos marcados como `hidden`
+- Selecciona el wrapper de UI según `field.type`
+- Construye el grid con `cols` y `field.gridCols`
+- Pasa `control` y `error` a cada wrapper
+
+### No hace
+- No instancia `useForm`
+- No contiene lógica de validación
+- No llama a APIs
+- No maneja el submit
+
+<Callout variant="warning">
+  Si necesitas un tipo de campo que no está en `fieldMap`, agrega el wrapper en el mapa — no pongas lógica condicional dentro del JSX del builder.
+</Callout>
+
+## Uso
+
+```typescript
+<DynamicFormBuilder
+  fields={loginFormFields}
+  methods={methods}
+  cols={2}
+/>
+```
+
+Con `cols={2}`, todos los campos ocupan 1 de 2 columnas por defecto. Un campo con `gridCols: 2` ocupa las 2 columnas completas.
+
+```typescript
+// Ejemplo: campo que ocupa el ancho completo en un grid de 2
+{
+  id: 3,
+  name: 'notes',
+  label: 'Notas',
+  type: 'textarea',
+  gridCols: 2,      // span 2 de 2 columnas
+}
+```
