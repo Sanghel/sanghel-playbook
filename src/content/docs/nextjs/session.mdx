@@ -1,0 +1,157 @@
+---
+title: Manejo de sesión
+description: Autenticación con cookies cifradas usando iron-session — setup, login, logout y protección de rutas.
+order: 32
+---
+
+La sesión guarda el estado de autenticación del usuario entre requests. El enfoque más simple y sin dependencias de base de datos es cifrar los datos en una cookie HTTP-only con `iron-session`.
+
+## iron-session
+
+`iron-session` serializa y cifra un objeto en una cookie. No requiere base de datos ni tokens externos.
+
+```bash
+pnpm add iron-session
+```
+
+## Configuración
+
+```ts
+// lib/session.ts
+import { SessionOptions } from 'iron-session'
+
+export interface SessionData {
+  userId?: string
+  role?: 'user' | 'admin'
+  isLoggedIn: boolean
+}
+
+export const sessionOptions: SessionOptions = {
+  password: process.env.SESSION_SECRET!,
+  cookieName: 'app_session',
+  cookieOptions: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax',
+  },
+}
+```
+
+<Callout type="warning">
+`SESSION_SECRET` debe tener mínimo 32 caracteres. Genera uno con `openssl rand -hex 32`.
+</Callout>
+
+## Login — Server Action
+
+```ts
+// app/actions/auth.ts
+'use server'
+
+import { cookies } from 'next/headers'
+import { getIronSession } from 'iron-session'
+import { sessionOptions, type SessionData } from '@/lib/session'
+import { redirect } from 'next/navigation'
+import { z } from 'zod'
+
+const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+export async function login(formData: FormData) {
+  const parsed = LoginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  })
+
+  if (!parsed.success) {
+    return { error: 'Datos inválidos' }
+  }
+
+  // Verificar credenciales contra tu DB...
+  // const user = await db.user.findUnique({ where: { email: parsed.data.email } })
+
+  const cookieStore = await cookies()
+  const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
+
+  session.userId = 'user-123'
+  session.role = 'user'
+  session.isLoggedIn = true
+  await session.save()
+
+  redirect('/dashboard')
+}
+```
+
+## Logout
+
+```ts
+// app/actions/auth.ts
+export async function logout() {
+  const cookieStore = await cookies()
+  const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
+  session.destroy()
+  redirect('/login')
+}
+```
+
+## Leer sesión en Server Components
+
+```tsx
+// app/dashboard/page.tsx
+import { cookies } from 'next/headers'
+import { getIronSession } from 'iron-session'
+import { sessionOptions, type SessionData } from '@/lib/session'
+import { redirect } from 'next/navigation'
+
+export default async function DashboardPage() {
+  const cookieStore = await cookies()
+  const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
+
+  if (!session.isLoggedIn) {
+    redirect('/login')
+  }
+
+  return <div>Bienvenido, usuario {session.userId}</div>
+}
+```
+
+## Helper reutilizable
+
+Para no repetir la lectura de sesión en cada página:
+
+```ts
+// lib/auth.ts
+import { cookies } from 'next/headers'
+import { getIronSession } from 'iron-session'
+import { sessionOptions, type SessionData } from './session'
+import { redirect } from 'next/navigation'
+
+export async function getSession() {
+  const cookieStore = await cookies()
+  return getIronSession<SessionData>(cookieStore, sessionOptions)
+}
+
+export async function requireAuth() {
+  const session = await getSession()
+  if (!session.isLoggedIn) redirect('/login')
+  return session
+}
+```
+
+```tsx
+// app/settings/page.tsx
+import { requireAuth } from '@/lib/auth'
+
+export default async function SettingsPage() {
+  const session = await requireAuth()
+  return <div>Settings de {session.userId}</div>
+}
+```
+
+## Reglas clave
+
+- La cookie debe ser `httpOnly` y `secure` en producción
+- Nunca guardar datos sensibles en la sesión (contraseñas, tokens completos)
+- `iron-session` es stateless — no hay tabla de sesiones en DB, la invalidación es por expiración
+- Para invalidación forzada (logout de todos los dispositivos) necesitas un enfoque con DB (next-auth, lucia)
