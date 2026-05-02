@@ -1,0 +1,145 @@
+---
+title: Server Actions
+description: Mutaciones de datos directamente desde componentes — sin endpoints intermedios, con validación Zod y manejo de errores.
+order: 31
+---
+
+Los Server Actions son funciones async marcadas con `'use server'` que corren en el servidor. Reemplazan los route handlers para mutaciones iniciadas desde el cliente: formularios, botones, operaciones CRUD.
+
+## Cuándo usar Server Actions vs Route Handlers
+
+| Server Actions | Route Handlers |
+|---|---|
+| Mutaciones desde UI (forms, botones) | APIs consumidas por terceros o mobile |
+| Formularios con `action=` nativo | Webhooks externos |
+| Acceso directo a DB/servicios internos | Respuestas con headers customizados |
+
+## Definición
+
+```ts
+// app/actions/user.ts
+'use server'
+
+export async function updateUser(id: string, data: FormData) {
+  const name = data.get('name') as string
+  // lógica...
+  return { success: true }
+}
+```
+
+O inline en el componente (solo si la acción es exclusiva de ese componente):
+
+```tsx
+// app/profile/page.tsx
+export default function ProfilePage() {
+  async function updateName(formData: FormData) {
+    'use server'
+    const name = formData.get('name') as string
+    // actualizar DB...
+  }
+
+  return <form action={updateName}>...</form>
+}
+```
+
+<Callout type="tip">
+Prefiere archivos separados (`app/actions/*.ts`) sobre actions inline. Son más fáciles de testear y reusar.
+</Callout>
+
+## Con validación Zod
+
+Siempre valida los datos de entrada. Los Server Actions reciben datos del cliente — tratarlos como input no confiable.
+
+```ts
+// app/actions/create-post.ts
+'use server'
+
+import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
+
+const CreatePostSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(10),
+})
+
+type ActionResult =
+  | { success: true; id: string }
+  | { success: false; errors: Record<string, string[]> }
+
+export async function createPost(formData: FormData): Promise<ActionResult> {
+  const raw = {
+    title: formData.get('title'),
+    content: formData.get('content'),
+  }
+
+  const parsed = CreatePostSchema.safeParse(raw)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      errors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  // const post = await db.post.create({ data: parsed.data })
+  revalidatePath('/posts')
+
+  return { success: true, id: 'new-id' }
+}
+```
+
+## Consumir desde el cliente con `useActionState`
+
+```tsx
+'use client'
+
+import { useActionState } from 'react'
+import { createPost } from '@/app/actions/create-post'
+
+export function CreatePostForm() {
+  const [state, action, pending] = useActionState(createPost, null)
+
+  return (
+    <form action={action}>
+      <input name="title" />
+      {state?.success === false && (
+        <span>{state.errors.title?.[0]}</span>
+      )}
+      <textarea name="content" />
+      <button type="submit" disabled={pending}>
+        {pending ? 'Guardando...' : 'Publicar'}
+      </button>
+    </form>
+  )
+}
+```
+
+## Llamada programática (sin formulario)
+
+```tsx
+'use client'
+
+import { deletePost } from '@/app/actions/delete-post'
+import { useTransition } from 'react'
+
+export function DeleteButton({ id }: { id: string }) {
+  const [isPending, startTransition] = useTransition()
+
+  return (
+    <button
+      onClick={() => startTransition(() => deletePost(id))}
+      disabled={isPending}
+    >
+      {isPending ? 'Eliminando...' : 'Eliminar'}
+    </button>
+  )
+}
+```
+
+## Reglas clave
+
+- `'use server'` va al inicio del archivo o de la función, nunca en el cuerpo
+- Valida siempre con Zod — los datos vienen del cliente
+- Usa `revalidatePath` o `revalidateTag` para invalidar la caché después de mutaciones
+- El tipo de retorno siempre debe ser serializable (no clases, no funciones)
+- Para optimistic updates, combinar con `useOptimistic`
