@@ -1,0 +1,198 @@
+---
+title: Integraciones
+description: Agregar React, Tailwind, MDX y View Transitions a un proyecto Astro — configuración y mejores prácticas.
+order: 43
+---
+
+Astro se extiende mediante integraciones oficiales. Se instalan con `astro add` que configura automáticamente `astro.config.mjs` y las dependencias necesarias.
+
+## React
+
+```bash
+pnpm astro add react
+```
+
+Esto instala `@astrojs/react` y configura el plugin. Después puedes usar componentes `.tsx` en tus páginas `.astro`:
+
+```astro
+---
+import MyCounter from '../components/MyCounter.tsx'
+---
+
+<!-- Sin hidratación: solo HTML estático -->
+<MyCounter initialCount={0} />
+
+<!-- Con hidratación: interactivo en el cliente -->
+<MyCounter client:load initialCount={0} />
+```
+
+<Callout type="tip">
+Puedes mezclar múltiples frameworks (React + Vue + Svelte) en el mismo proyecto. Cada isla se hidrata de forma independiente.
+</Callout>
+
+## Tailwind CSS
+
+```bash
+pnpm astro add tailwind
+```
+
+Crea `tailwind.config.mjs` y agrega la integración en `astro.config.mjs`. Luego puedes usar Tailwind en cualquier archivo `.astro`, `.tsx`, `.vue`:
+
+```astro
+---
+// src/pages/index.astro
+---
+
+<main class="mx-auto max-w-4xl px-6 py-12">
+  <h1 class="text-4xl font-bold text-zinc-900">Hola mundo</h1>
+</main>
+```
+
+Para estilos globales adicionales, crea un archivo CSS e impórtalo en tu layout base:
+
+```astro
+---
+// src/layouts/Base.astro
+import '../styles/global.css'
+---
+```
+
+## MDX
+
+```bash
+pnpm astro add mdx
+```
+
+Permite usar componentes de React/Astro dentro de archivos `.mdx`:
+
+```mdx
+---
+title: Mi post con componentes
+---
+
+import { Callout } from '../components/Callout.astro'
+import Chart from '../components/Chart.tsx'
+
+## Sección con componentes
+
+<Callout type="info">
+  Este es un callout dentro de Markdown.
+</Callout>
+
+<Chart client:visible data={[1, 2, 3]} />
+```
+
+Para pasar componentes globalmente a todos los archivos MDX sin importarlos cada vez:
+
+```js
+// astro.config.mjs
+import mdx from '@astrojs/mdx'
+import { defineConfig } from 'astro/config'
+
+export default defineConfig({
+  integrations: [
+    mdx({
+      components: {
+        // Reemplazar elementos nativos de Markdown
+        h2: './src/components/Heading2.astro',
+        pre: './src/components/CodeBlock.astro',
+      },
+    }),
+  ],
+})
+```
+
+## View Transitions
+
+Las View Transitions permiten animaciones suaves entre páginas sin SPA completo. Astro las implementa con la API nativa del navegador y un fallback para navegadores sin soporte.
+
+```bash
+pnpm astro add @astrojs/view-transitions
+```
+
+Agrega el componente en el layout base:
+
+```astro
+---
+// src/layouts/Base.astro
+import { ViewTransitions } from 'astro:transitions'
+---
+
+<html>
+  <head>
+    <ViewTransitions />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+```
+
+Animar elementos específicos con `transition:name`:
+
+```astro
+---
+// src/pages/blog/index.astro
+const posts = await getCollection('blog')
+---
+
+{posts.map((post) => (
+  <article>
+    <img
+      src={post.data.cover.src}
+      transition:name={`cover-${post.slug}`}
+    />
+    <h2 transition:name={`title-${post.slug}`}>{post.data.title}</h2>
+  </article>
+))}
+```
+
+```astro
+---
+// src/pages/blog/[slug].astro
+---
+
+<img
+  src={post.data.cover.src}
+  transition:name={`cover-${post.slug}`}
+/>
+<h1 transition:name={`title-${post.slug}`}>{post.data.title}</h1>
+```
+
+El navegador animará automáticamente los elementos con el mismo `transition:name` entre páginas.
+
+## Persistir estado entre navegaciones con View Transitions
+
+Por defecto, cada navegación destruye y recrea las islas. Para persistir un componente (ej: un reproductor de audio):
+
+```astro
+<MusicPlayer client:load transition:persist />
+```
+
+## Configuración completa de ejemplo
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config'
+import react from '@astrojs/react'
+import tailwind from '@astrojs/tailwind'
+import mdx from '@astrojs/mdx'
+import { ViewTransitions } from 'astro:transitions'
+
+export default defineConfig({
+  integrations: [
+    react(),
+    tailwind(),
+    mdx(),
+  ],
+  output: 'static', // o 'server' para SSR
+})
+```
+
+## Reglas clave
+
+- Usa `pnpm astro add <integration>` en lugar de instalar manualmente — configura todo automáticamente
+- Las islas de React necesitan `@astrojs/react`; sin la integración el componente se renderiza como HTML estático sin hidratación posible
+- View Transitions funciona mejor con `transition:name` únicos por página — evita duplicados
+- `transition:persist` es útil para elementos globales (player, cart) que no deben re-montarse
+- Tailwind v4 requiere `@astrojs/tailwind@^6` — verifica la compatibilidad de versiones
