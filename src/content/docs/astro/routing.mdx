@@ -1,0 +1,139 @@
+---
+title: Routing y páginas
+description: Cómo funciona el routing basado en archivos de Astro — rutas estáticas, dinámicas, SSG y SSR.
+order: 40
+---
+
+Astro usa routing basado en el sistema de archivos. Cada archivo en `src/pages/` se convierte en una ruta. No hay configuración adicional.
+
+## Rutas estáticas
+
+```
+src/pages/
+├── index.astro          → /
+├── about.astro          → /about
+└── blog/
+    ├── index.astro      → /blog
+    └── primer-post.astro → /blog/primer-post
+```
+
+## Rutas dinámicas con `getStaticPaths`
+
+Para generar múltiples páginas desde datos (blog posts, productos), usa corchetes en el nombre del archivo y exporta `getStaticPaths`.
+
+```astro
+---
+// src/pages/blog/[slug].astro
+import { getCollection } from 'astro:content'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog')
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }))
+}
+
+const { post } = Astro.props
+const { Content } = await post.render()
+---
+
+<article>
+  <h1>{post.data.title}</h1>
+  <Content />
+</article>
+```
+
+Cada objeto en el array retornado genera una página. `params` define la URL, `props` pasa datos al componente.
+
+## Rutas con segmentos rest
+
+Para rutas con profundidad variable (docs anidadas), usa `[...slug]`:
+
+```
+src/pages/docs/[...slug].astro  →  /docs/react/hooks, /docs/nextjs/middleware, etc.
+```
+
+```astro
+---
+export async function getStaticPaths() {
+  const docs = await getCollection('docs')
+
+  return docs.map((doc) => ({
+    params: { slug: doc.slug },
+    props: { doc },
+  }))
+}
+---
+```
+
+## SSG vs SSR por ruta
+
+Por defecto Astro genera páginas estáticas (SSG). Para SSR necesitas un adaptador y activar el modo por archivo:
+
+```astro
+---
+// Activar SSR solo en esta página
+export const prerender = false
+
+// Acceder a datos de la request
+const user = Astro.locals.user
+const { id } = Astro.params
+---
+```
+
+O configurar SSR global en `astro.config.mjs` y marcar páginas estáticas con `export const prerender = true`.
+
+## Redirecciones
+
+```js
+// astro.config.mjs
+export default defineConfig({
+  redirects: {
+    '/old-blog': '/blog',
+    '/old-blog/[slug]': '/blog/[slug]',
+  },
+})
+```
+
+## Pasar datos entre layout y página
+
+```astro
+---
+// src/pages/about.astro
+import Layout from '../layouts/Base.astro'
+---
+
+<Layout title="About" description="Sobre nosotros">
+  <h1>About</h1>
+</Layout>
+```
+
+```astro
+---
+// src/layouts/Base.astro
+interface Props {
+  title: string
+  description?: string
+}
+const { title, description } = Astro.props
+---
+
+<html>
+  <head>
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+```
+
+## Reglas clave
+
+- El archivo `index.astro` dentro de una carpeta mapea a la raíz de esa ruta (`/blog/index.astro` → `/blog`)
+- `getStaticPaths` solo puede usarse en archivos con parámetros dinámicos (`[slug].astro`)
+- En SSR, `getStaticPaths` no existe — los params se leen de `Astro.params` en runtime
+- Usa `Astro.redirect('/ruta')` para redirecciones programáticas dentro del frontmatter
