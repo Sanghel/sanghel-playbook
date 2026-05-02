@@ -3,6 +3,7 @@ import { getDocBySlug, getAllDocs, getAdjacentDocs } from '@/lib/docs'
 import { renderMDX, extractToc } from '@/lib/mdx'
 import { TableOfContents } from '@/components/TableOfContents'
 import { DocNavigation } from '@/components/DocNavigation'
+import { DownloadButton } from '@/components/DownloadButton'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -45,9 +46,17 @@ export default async function DocPage({ params }: PageProps) {
     <div className="flex gap-8 w-full max-w-5xl mx-auto px-6 py-10">
       <article className="flex-1 min-w-0">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            {doc.frontmatter.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              {doc.frontmatter.title}
+            </h1>
+            <div className="mt-1.5 shrink-0">
+              <DownloadButton
+                content={doc.content}
+                filename={`${doc.frontmatter.title.toLowerCase().replace(/\s+/g, '-')}.md`}
+              />
+            </div>
+          </div>
           {doc.frontmatter.description && (
             <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-400">
               {doc.frontmatter.description}
