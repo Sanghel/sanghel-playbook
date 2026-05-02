@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-import type { NavSection, NavItem } from '@/components/Sidebar/types'
+import type { NavGroup, NavSubSection, NavItem } from '@/components/Sidebar/types'
 
 const DOCS_DIR = path.join(process.cwd(), 'src/content/docs')
 
@@ -74,29 +74,47 @@ export function getAdjacentDocs(slug: string[]): {
   }
 }
 
-export function getNavigation(): NavSection[] {
-  const files = getMdxFiles(DOCS_DIR)
-  const sections: Map<string, NavItem[]> = new Map()
+function formatTitle(raw: string): string {
+  return raw.charAt(0).toUpperCase() + raw.slice(1).replace(/-/g, ' ')
+}
 
-  for (const file of files) {
-    const slug = pathToSlug(file)
-    const raw = fs.readFileSync(file, 'utf-8')
-    const { data } = matter(raw)
-    const fm = data as DocFrontmatter
+export function getNavigation(): NavGroup[] {
+  const docs = getAllDocs()
+  const groups: Map<string, NavGroup> = new Map()
 
-    const rawSection = slug.length > 1 ? slug[0] : 'General'
-    const sectionTitle =
-      rawSection.charAt(0).toUpperCase() + rawSection.slice(1).replace(/-/g, ' ')
-
+  for (const doc of docs) {
+    const { slug, frontmatter: fm } = doc
     const item: NavItem = {
       title: fm.title ?? slug[slug.length - 1].replace(/-/g, ' '),
       href: `/docs/${slug.join('/')}`,
       slug,
     }
 
-    const existing = sections.get(sectionTitle) ?? []
-    sections.set(sectionTitle, [...existing, item])
+    if (slug.length === 1) {
+      // Root file → "General" group, direct item
+      const group = groups.get('General') ?? { title: 'General', items: [], subsections: [] }
+      group.items.push(item)
+      groups.set('General', group)
+    } else if (slug.length === 2) {
+      // tech/file → NavGroup from slug[0], direct item
+      const groupTitle = formatTitle(slug[0])
+      const group = groups.get(groupTitle) ?? { title: groupTitle, items: [], subsections: [] }
+      group.items.push(item)
+      groups.set(groupTitle, group)
+    } else {
+      // tech/topic/file → NavGroup from slug[0], NavSubSection from slug[1]
+      const groupTitle = formatTitle(slug[0])
+      const subTitle = formatTitle(slug[1])
+      const group = groups.get(groupTitle) ?? { title: groupTitle, items: [], subsections: [] }
+      let sub = group.subsections.find((s) => s.title === subTitle)
+      if (!sub) {
+        sub = { title: subTitle, items: [] }
+        group.subsections.push(sub)
+      }
+      sub.items.push(item)
+      groups.set(groupTitle, group)
+    }
   }
 
-  return Array.from(sections.entries()).map(([title, items]) => ({ title, items }))
+  return Array.from(groups.values())
 }

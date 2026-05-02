@@ -4,7 +4,13 @@ export interface NavItem {
   slug: string[]
 }
 
-export interface NavSection {
+export interface NavSubSection {
   title: string
   items: NavItem[]
+}
+
+export interface NavGroup {
+  title: string
+  items: NavItem[]
+  subsections: NavSubSection[]
 }
