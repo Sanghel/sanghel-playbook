@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import type { NavSection } from './types'
+import type { NavGroup } from './types'
 
-export function useControllerSidebar(sections: NavSection[]) {
+export function useControllerSidebar(groups: NavGroup[]) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
@@ -13,8 +13,8 @@ export function useControllerSidebar(sections: NavSection[]) {
     return pathname === href
   }
 
-  function toggleSection(title: string) {
-    setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
+  function toggleKey(key: string) {
+    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
   function toggleMobile() {
@@ -26,12 +26,12 @@ export function useControllerSidebar(sections: NavSection[]) {
   }
 
   return {
-    sections,
+    groups,
     pathname,
     mobileOpen,
     collapsed,
     isActive,
-    toggleSection,
+    toggleKey,
     toggleMobile,
     closeMobile,
   }

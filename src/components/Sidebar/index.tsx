@@ -2,51 +2,93 @@
 
 import Link from 'next/link'
 import { useControllerSidebar } from './useControllerSidebar'
-import type { NavSection } from './types'
+import type { NavGroup } from './types'
 
 interface SidebarProps {
-  sections: NavSection[]
+  groups: NavGroup[]
 }
 
-export function Sidebar({ sections }: SidebarProps) {
-  const { mobileOpen, collapsed, isActive, toggleSection, toggleMobile, closeMobile } =
-    useControllerSidebar(sections)
+export function Sidebar({ groups }: SidebarProps) {
+  const { mobileOpen, collapsed, isActive, toggleKey, toggleMobile, closeMobile } =
+    useControllerSidebar(groups)
 
   const nav = (
     <nav className="flex flex-col gap-6 py-6 px-4">
-      {sections.map((section) => (
-        <div key={section.title}>
+      {groups.map((group) => (
+        <div key={group.title}>
+          {/* Group header */}
           <button
-            onClick={() => toggleSection(section.title)}
+            onClick={() => toggleKey(group.title)}
             className="flex w-full items-center justify-between mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
           >
-            {section.title}
-            <span className="text-zinc-400">{collapsed[section.title] ? '+' : '−'}</span>
+            {group.title}
+            <span className="text-zinc-400">{collapsed[group.title] ? '+' : '−'}</span>
           </button>
 
-          {!collapsed[section.title] && (
-            <ul className="flex flex-col gap-0.5">
-              {section.items.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={closeMobile}
-                    className={`block rounded-md px-3 py-1.5 text-sm transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-medium'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                    }`}
-                  >
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {!collapsed[group.title] && (
+            <div className="flex flex-col gap-3">
+              {/* Sub-sections (depth 3) */}
+              {group.subsections.map((sub) => {
+                const subKey = `${group.title}:${sub.title}`
+                return (
+                  <div key={sub.title}>
+                    <button
+                      onClick={() => toggleKey(subKey)}
+                      className="flex w-full items-center justify-between mb-1 pl-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+                    >
+                      {sub.title}
+                      <span>{collapsed[subKey] ? '+' : '−'}</span>
+                    </button>
+
+                    {!collapsed[subKey] && (
+                      <ul className="flex flex-col gap-0.5">
+                        {sub.items.map((item) => (
+                          <li key={item.href}>
+                            <Link
+                              href={item.href}
+                              onClick={closeMobile}
+                              className={`block rounded-md px-3 py-1.5 text-sm transition-colors ${
+                                isActive(item.href)
+                                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-medium'
+                                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              }`}
+                            >
+                              {item.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )
+              })}
+
+              {/* Direct items (depth 2) */}
+              {group.items.length > 0 && (
+                <ul className="flex flex-col gap-0.5">
+                  {group.items.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={closeMobile}
+                        className={`block rounded-md px-3 py-1.5 text-sm transition-colors ${
+                          isActive(item.href)
+                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-medium'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
       ))}
 
-      {sections.length === 0 && (
+      {groups.length === 0 && (
         <p className="text-xs text-zinc-400 dark:text-zinc-500">No docs yet.</p>
       )}
     </nav>

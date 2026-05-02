@@ -1,0 +1,113 @@
+---
+title: Middleware
+description: Interceptar requests antes de llegar a las rutas — auth guards, redirects y headers personalizados.
+order: 30
+---
+
+El middleware de Next.js se ejecuta en el edge **antes** de que la request llegue a la ruta. Es el lugar correcto para lógica que aplica a múltiples rutas: verificar sesión, redirigir, modificar headers.
+
+## Cuándo usar middleware
+
+Úsalo cuando necesites ejecutar lógica **en cada request** para un conjunto de rutas:
+
+- Verificar que el usuario tiene sesión activa antes de acceder a rutas protegidas
+- Redirigir según el locale o feature flags
+- Agregar headers de seguridad (CSP, CORS)
+- Logging de requests
+
+No lo uses para lógica de negocio, operaciones de base de datos ni side effects pesados. El middleware debe ser rápido.
+
+## Estructura básica
+
+```ts
+// middleware.ts (en la raíz del proyecto)
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
+}
+```
+
+El `matcher` define en qué rutas se ejecuta. Sin él, corre en todas las rutas incluyendo assets estáticos.
+
+## Auth guard con sesión
+
+Patrón típico: verificar una cookie de sesión y redirigir a login si no existe.
+
+```ts
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const PROTECTED_PATHS = ['/dashboard', '/settings', '/profile']
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
+
+  if (!isProtected) return NextResponse.next()
+
+  const session = request.cookies.get('session')?.value
+
+  if (!session) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('from', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+}
+```
+
+<Callout type="warning">
+El middleware corre en el edge: no tiene acceso a `process.env` de Node.js ni a módulos que requieran un entorno completo. Usa `NEXT_PUBLIC_*` o variables del runtime.
+</Callout>
+
+## Verificar JWT en middleware
+
+Para validar un token firmado sin llamar a la base de datos:
+
+```ts
+import { jwtVerify } from 'jose'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!)
+
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('auth_token')?.value
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  try {
+    await jwtVerify(token, SECRET)
+    return NextResponse.next()
+  } catch {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+}
+
+export const config = {
+  matcher: ['/dashboard/:path*'],
+}
+```
+
+Usa `jose` (no `jsonwebtoken`) porque es compatible con el edge runtime.
+
+## Reglas clave
+
+- El archivo se llama `middleware.ts` y vive en la raíz del proyecto (al lado de `src/`)
+- Exporta siempre un `config.matcher` para evitar correr en rutas de assets
+- Retorna `NextResponse.next()`, `NextResponse.redirect()` o `NextResponse.rewrite()`
+- Mantenerlo liviano: sin llamadas a DB, sin imports pesados

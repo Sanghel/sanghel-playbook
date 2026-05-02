@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const sections = getNavigation()
+  const groups = getNavigation()
   const searchDocs = getAllDocs().map((doc) => ({
     title: doc.frontmatter.title,
     description: doc.frontmatter.description ?? '',
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
         <ThemeProvider>
           <div className="flex h-screen overflow-hidden">
-            <Sidebar sections={sections} />
+            <Sidebar groups={groups} />
             <div className="flex flex-1 flex-col overflow-hidden">
               <Header />
               <main className="flex-1 overflow-y-auto">

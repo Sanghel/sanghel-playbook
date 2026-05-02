@@ -1,0 +1,143 @@
+---
+title: API Routes
+description: Route handlers en Next.js App Router — cuándo usarlos, estructura, tipado y comparación con Server Actions.
+order: 33
+---
+
+Los Route Handlers (`app/api/.../route.ts`) son los endpoints HTTP de Next.js App Router. Son la evolución de las API Routes del Pages Router, con soporte nativo para todos los métodos HTTP y el Web standard `Request`/`Response`.
+
+## Cuándo usar Route Handlers vs Server Actions
+
+| Usa Route Handlers cuando... | Usa Server Actions cuando... |
+|---|---|
+| La API la consumen apps externas (mobile, terceros) | La mutación la dispara tu propia UI |
+| Necesitas webhooks (Stripe, GitHub) | Quieres llamar directamente desde un componente |
+| Necesitas control fino sobre headers/status | Necesitas `revalidatePath` automático |
+| Construyes una REST API pública | El caso de uso es un formulario o botón |
+
+## Estructura
+
+```
+app/
+└── api/
+    └── posts/
+        ├── route.ts          ← GET /api/posts, POST /api/posts
+        └── [id]/
+            └── route.ts      ← GET /api/posts/123, PUT, DELETE
+```
+
+## GET con tipado
+
+```ts
+// app/api/posts/route.ts
+import { NextResponse } from 'next/server'
+
+interface Post {
+  id: string
+  title: string
+}
+
+export async function GET() {
+  const posts: Post[] = [
+    { id: '1', title: 'Primer post' },
+  ]
+
+  return NextResponse.json(posts)
+}
+```
+
+## POST con validación Zod
+
+```ts
+// app/api/posts/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
+const CreatePostSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(10),
+})
+
+export async function POST(request: NextRequest) {
+  const body = await request.json()
+  const parsed = CreatePostSchema.safeParse(body)
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { errors: parsed.error.flatten().fieldErrors },
+      { status: 422 }
+    )
+  }
+
+  // const post = await db.post.create({ data: parsed.data })
+
+  return NextResponse.json({ id: 'new-id', ...parsed.data }, { status: 201 })
+}
+```
+
+## GET con parámetro dinámico
+
+```ts
+// app/api/posts/[id]/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
+  // const post = await db.post.findUnique({ where: { id } })
+
+  if (!id) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  return NextResponse.json({ id, title: 'Ejemplo' })
+}
+```
+
+## Webhook con verificación de firma
+
+```ts
+// app/api/webhooks/stripe/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+export async function POST(request: NextRequest) {
+  const body = await request.text()
+  const signature = request.headers.get('stripe-signature')!
+
+  try {
+    const event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    )
+
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        // manejar pago...
+        break
+    }
+
+    return NextResponse.json({ received: true })
+  } catch {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
+}
+```
+
+<Callout type="warning">
+Los webhooks deben usar `request.text()` antes de `constructEvent`. Si usas `request.json()` primero, el body ya está consumido y la verificación falla.
+</Callout>
+
+## Reglas clave
+
+- Exporta funciones con el nombre del método HTTP en mayúsculas: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
+- Para rutas dinámicas, `params` es una `Promise` en Next.js 15+ — siempre usa `await params`
+- Valida siempre el body con Zod antes de procesarlo
+- Retorna status codes correctos: 200 OK, 201 Created, 422 Unprocessable, 404 Not Found
+- Para autenticación en route handlers, verifica la sesión al inicio de cada handler
