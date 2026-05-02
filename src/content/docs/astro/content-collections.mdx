@@ -1,0 +1,185 @@
+---
+title: Content Collections
+description: Gestión de contenido tipado en Astro — definir esquemas con Zod, consultar colecciones y referencias entre ellas.
+order: 42
+---
+
+Las Content Collections son la forma nativa de Astro para gestionar archivos de contenido (Markdown, MDX, JSON, YAML) con tipado completo en TypeScript. Se definen en `src/content/` y se configuran en `src/content/config.ts`.
+
+## Configuración básica
+
+```ts
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content'
+
+const blog = defineCollection({
+  type: 'content', // archivos .md o .mdx
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    publishedAt: z.date(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+})
+
+const authors = defineCollection({
+  type: 'data', // archivos .json o .yaml
+  schema: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    avatar: z.string().url().optional(),
+  }),
+})
+
+export const collections = { blog, authors }
+```
+
+El esquema Zod valida el frontmatter en tiempo de build — si un archivo tiene datos incorrectos, el build falla con un mensaje claro.
+
+## Estructura de archivos
+
+```
+src/content/
+├── config.ts
+├── blog/
+│   ├── primer-post.md
+│   ├── segundo-post.mdx
+│   └── borrador.md
+└── authors/
+    ├── ana.json
+    └── carlos.yaml
+```
+
+## Consultar colecciones
+
+```astro
+---
+import { getCollection, getEntry } from 'astro:content'
+
+// Todos los posts (incluyendo borradores)
+const allPosts = await getCollection('blog')
+
+// Solo posts publicados
+const publishedPosts = await getCollection('blog', ({ data }) => !data.draft)
+
+// Ordenar por fecha
+const sortedPosts = publishedPosts.sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+)
+
+// Un post específico por slug
+const post = await getEntry('blog', 'primer-post')
+---
+```
+
+## Renderizar contenido
+
+```astro
+---
+import { getEntry } from 'astro:content'
+
+const post = await getEntry('blog', Astro.params.slug as string)
+if (!post) return Astro.redirect('/404')
+
+const { Content, headings } = await post.render()
+---
+
+<article>
+  <h1>{post.data.title}</h1>
+  <time>{post.data.publishedAt.toLocaleDateString()}</time>
+  <Content />
+</article>
+```
+
+`render()` devuelve el componente `Content` y los `headings` para generar un TOC.
+
+## Referencias entre colecciones
+
+```ts
+// src/content/config.ts
+import { defineCollection, reference, z } from 'astro:content'
+
+const blog = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    author: reference('authors'), // referencia tipada a la colección authors
+    relatedPosts: z.array(reference('blog')).optional(),
+  }),
+})
+```
+
+```md
+---
+title: Mi Post
+author: ana  # debe ser el slug de un entry en authors/
+relatedPosts:
+  - segundo-post
+---
+```
+
+```astro
+---
+import { getEntry } from 'astro:content'
+
+const post = await getEntry('blog', 'primer-post')
+
+// Resolver la referencia al autor
+const author = await getEntry(post.data.author)
+---
+
+<p>Por {author.data.name}</p>
+```
+
+<Callout type="tip">
+Las referencias garantizan en build time que el entry referenciado existe. Si `ana.json` no existe, el build falla con un error claro.
+</Callout>
+
+## Imágenes en el esquema
+
+```ts
+import { defineCollection, z } from 'astro:content'
+import { image } from 'astro:content'
+
+const blog = defineCollection({
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      cover: image(), // valida y optimiza la imagen con astro:assets
+    }),
+})
+```
+
+```md
+---
+title: Post con imagen
+cover: ./cover.jpg
+---
+```
+
+Astro procesa la imagen con su pipeline de optimización automáticamente.
+
+## Filtrar y paginar
+
+```astro
+---
+import { getCollection } from 'astro:content'
+
+const PAGE_SIZE = 10
+const page = Number(Astro.params.page ?? 1)
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft)
+const totalPages = Math.ceil(allPosts.length / PAGE_SIZE)
+const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+---
+```
+
+## Reglas clave
+
+- `config.ts` debe estar en `src/content/` — no en subdirectorios
+- El `type: 'content'` es para MD/MDX; `type: 'data'` para JSON/YAML
+- Los slugs se generan automáticamente desde el nombre del archivo (sin extensión)
+- Usa `reference()` en lugar de `z.string()` para IDs entre colecciones — da tipado y validación
+- El frontmatter no válido rompe el build, no el runtime — los errores aparecen temprano
+- `getCollection` siempre retorna un array (nunca `null`); `getEntry` puede retornar `undefined`

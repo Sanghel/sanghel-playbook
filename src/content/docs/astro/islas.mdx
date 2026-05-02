@@ -1,0 +1,142 @@
+---
+title: Componentes e islas
+description: Arquitectura de islas en Astro — cómo y cuándo hidratar componentes de UI interactivos.
+order: 41
+---
+
+Astro envía **cero JavaScript por defecto**. Los componentes de frameworks (React, Vue, Svelte) se renderizan a HTML estático en el servidor. Para añadir interactividad usas las directivas `client:*` — eso convierte el componente en una "isla" hidratada en el cliente.
+
+## Componentes .astro vs componentes de framework
+
+| `.astro` | React / Vue / Svelte |
+|---|---|
+| Solo se ejecutan en el servidor | Pueden ejecutarse en cliente también |
+| Sin estado reactivo | Con estado (`useState`, `ref`, etc.) |
+| Sin JS en el bundle por defecto | Requieren hidratación explícita |
+| Ideal para layouts, estructura, contenido | Ideal para widgets interactivos |
+
+## Directivas de hidratación
+
+```astro
+---
+import Counter from '../components/Counter.tsx'
+import HeavyWidget from '../components/HeavyWidget.tsx'
+import Modal from '../components/Modal.tsx'
+import Chart from '../components/Chart.tsx'
+---
+
+<!-- Hidrata inmediatamente al cargar la página -->
+<Counter client:load />
+
+<!-- Hidrata cuando el navegador está idle (no bloquea el render inicial) -->
+<HeavyWidget client:idle />
+
+<!-- Hidrata cuando el componente entra en el viewport -->
+<Chart client:visible />
+
+<!-- Hidrata solo en ciertos breakpoints (media query) -->
+<Modal client:media="(max-width: 768px)" />
+
+<!-- Solo hidrata en el cliente, sin SSR del componente -->
+<Counter client:only="react" />
+```
+
+<Callout type="tip">
+Usa `client:visible` para componentes pesados que están debajo del fold — no bloquean el LCP y se hidratan solo cuando el usuario los ve.
+</Callout>
+
+## Cuándo usar cada directiva
+
+| Directiva | Cuándo usarla |
+|---|---|
+| `client:load` | Componentes críticos que deben ser interactivos de inmediato (navbar, form principal) |
+| `client:idle` | Widgets no críticos que pueden esperar (chat, analytics) |
+| `client:visible` | Componentes debajo del fold (carruseles, tablas de precios) |
+| `client:media` | Componentes exclusivos de mobile o desktop |
+| `client:only` | Componentes que no tienen sentido en SSR (requieren `window`, `localStorage`) |
+
+## Pasar props a islas
+
+```astro
+---
+import SearchBar from '../components/SearchBar.tsx'
+
+const items = await fetchItems()
+---
+
+<SearchBar client:load items={items} placeholder="Buscar..." />
+```
+
+Los props se serializan para enviarse al cliente. Solo pueden ser valores serializables: strings, números, arrays, objetos planos. No funciones ni clases.
+
+## Compartir estado entre islas
+
+Las islas son independientes — no comparten estado por defecto. Para estado compartido usa una store externa como **nanostores** (recomendado para Astro por su tamaño mínimo):
+
+```ts
+// src/stores/cart.ts
+import { atom, computed } from 'nanostores'
+
+export const cartItems = atom<CartItem[]>([])
+export const cartCount = computed(cartItems, (items) => items.length)
+```
+
+```tsx
+// src/components/CartIcon.tsx
+import { useStore } from '@nanostores/react'
+import { cartCount } from '../stores/cart'
+
+export function CartIcon() {
+  const count = useStore(cartCount)
+  return <button>Cart ({count})</button>
+}
+```
+
+```tsx
+// src/components/AddToCart.tsx
+import { cartItems } from '../stores/cart'
+
+export function AddToCart({ item }: { item: CartItem }) {
+  function add() {
+    cartItems.set([...cartItems.get(), item])
+  }
+  return <button onClick={add}>Agregar</button>
+}
+```
+
+Ambas islas están sincronizadas aunque estén en partes distintas de la página.
+
+## Componentes Astro con slots
+
+Para composición sin JS, usa `<slot>` en componentes `.astro`:
+
+```astro
+---
+// src/components/Card.astro
+interface Props {
+  title: string
+}
+const { title } = Astro.props
+---
+
+<div class="card">
+  <h2>{title}</h2>
+  <slot /> <!-- contenido del hijo -->
+  <slot name="footer" /> <!-- slot nombrado -->
+</div>
+```
+
+```astro
+<Card title="Mi card">
+  <p>Contenido principal</p>
+  <div slot="footer">Footer aquí</div>
+</Card>
+```
+
+## Reglas clave
+
+- Un componente sin `client:*` no envía nada de JS al navegador
+- `client:only` omite el SSR completamente — el componente no renderiza HTML en el servidor
+- Los props deben ser serializables: no pases funciones ni instancias de clases a las islas
+- Para estado compartido entre islas usa nanostores; para estado global complejo considera Zustand con `client:only`
+- Prefiere `client:visible` sobre `client:load` para mejorar el LCP de la página
