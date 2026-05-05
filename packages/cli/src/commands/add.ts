@@ -25,21 +25,31 @@ export async function runInstall(
   for (const manifest of manifests) {
     const fileResults = await installFiles(manifest, cwd)
     for (const result of fileResults) {
-      onStep({ label: result.path, status: result.skipped ? 'skipped' : 'done' })
+      onStep({ label: result.path, status: result.error ? 'error' : result.skipped ? 'skipped' : 'done' })
     }
 
     if (manifest.deps.dependencies.length > 0) {
       const cmd = getInstallCommand(pm, manifest.deps.dependencies)
       onStep({ label: cmd, status: 'running' })
-      execSync(cmd, { cwd, stdio: 'pipe' })
-      onStep({ label: cmd, status: 'done' })
+      try {
+        execSync(cmd, { cwd, stdio: 'pipe' })
+        onStep({ label: cmd, status: 'done' })
+      } catch {
+        onStep({ label: cmd, status: 'error' })
+        throw new Error(`Failed to install dependencies: ${cmd}`)
+      }
     }
 
     if (manifest.deps.devDependencies.length > 0) {
       const cmd = getInstallCommand(pm, manifest.deps.devDependencies, true)
       onStep({ label: cmd, status: 'running' })
-      execSync(cmd, { cwd, stdio: 'pipe' })
-      onStep({ label: cmd, status: 'done' })
+      try {
+        execSync(cmd, { cwd, stdio: 'pipe' })
+        onStep({ label: cmd, status: 'done' })
+      } catch {
+        onStep({ label: cmd, status: 'error' })
+        throw new Error(`Failed to install devDependencies: ${cmd}`)
+      }
     }
 
     lastDocsUrl = manifest.docsUrl
