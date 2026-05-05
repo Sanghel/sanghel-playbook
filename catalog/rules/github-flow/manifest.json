@@ -1,0 +1,15 @@
+{
+  "id": "github-flow",
+  "name": "GitHub Flow",
+  "description": "Flujo de trabajo completo con Git y GitHub: feature branches, PRs, code review y merge strategy",
+  "category": "rules",
+  "tags": ["git", "github", "workflow", "branching"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/github-flow.md", "dest": "rules/github-flow.md" }
+  ],
+  "docsUrl": "https://sanghel-playbook.vercel.app/docs/catalog/rules/github-flow"
+}

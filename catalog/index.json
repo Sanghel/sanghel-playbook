@@ -1,0 +1,8 @@
+{
+  "categories": [
+    { "id": "react", "label": "React", "indexUrl": "catalog/react/index.json" },
+    { "id": "nextjs", "label": "Next.js", "indexUrl": "catalog/nextjs/index.json" },
+    { "id": "astro", "label": "Astro", "indexUrl": "catalog/astro/index.json" },
+    { "id": "rules", "label": "Rules & Guides", "indexUrl": "catalog/rules/index.json" }
+  ]
+}
