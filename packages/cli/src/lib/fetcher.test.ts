@@ -44,6 +44,14 @@ describe('fetchText', () => {
     expect(fetch).toHaveBeenCalledWith(`${BASE}/catalog/rules/github-flow/files/github-flow.md`)
     expect(result).toBe('file content here')
   })
+
+  it('throws when response is not ok', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 500 } as Response)
+
+    await expect(fetchText('catalog/rules/github-flow/files/github-flow.md')).rejects.toThrow(
+      'Failed to fetch catalog/rules/github-flow/files/github-flow.md: 500'
+    )
+  })
 })
 
 describe('fetchCatalogIndex', () => {

@@ -3,13 +3,23 @@ import type { CatalogIndex, CategoryIndex, ManifestItem } from '../types.js'
 const BASE_URL = 'https://raw.githubusercontent.com/Sanghel/sanghel-playbook/main'
 
 export async function fetchJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}/${path}`)
+  let res: Response
+  try {
+    res = await fetch(`${BASE_URL}/${path}`)
+  } catch (cause) {
+    throw new Error(`Network error fetching ${path}`, { cause })
+  }
   if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
   return res.json() as Promise<T>
 }
 
 export async function fetchText(path: string): Promise<string> {
-  const res = await fetch(`${BASE_URL}/${path}`)
+  let res: Response
+  try {
+    res = await fetch(`${BASE_URL}/${path}`)
+  } catch (cause) {
+    throw new Error(`Network error fetching ${path}`, { cause })
+  }
   if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
   return res.text()
 }
