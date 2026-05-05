@@ -42,4 +42,9 @@ describe('scaffold', () => {
     vi.mocked(spawnSync).mockReturnValueOnce({ status: 1 } as ReturnType<typeof spawnSync>)
     expect(scaffold('nextjs', 'my-app')).toBe(false)
   })
+
+  it('lanza error cuando status es null (comando no encontrado)', () => {
+    vi.mocked(spawnSync).mockReturnValueOnce({ status: null, error: new Error('spawn npm ENOENT'), signal: null } as unknown as ReturnType<typeof spawnSync>)
+    expect(() => scaffold('react-vite', 'my-app')).toThrow('spawn npm ENOENT')
+  })
 })

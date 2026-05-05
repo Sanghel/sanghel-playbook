@@ -13,5 +13,8 @@ const COMMANDS: Record<Stack, Command> = {
 export function scaffold(stack: Stack, projectName: string): boolean {
   const [cmd, args] = COMMANDS[stack]
   const result = spawnSync(cmd, [...args, projectName], { stdio: 'inherit', shell: true })
+  if (result.status === null) {
+    throw result.error ?? new Error(`Spawning ${cmd} failed (signal: ${result.signal})`)
+  }
   return result.status === 0
 }
