@@ -1,66 +1,63 @@
 ---
 title: Getting Started
-description: Welcome to Sanghel Playbook — a living reference of patterns and decisions.
+description: Bienvenido a sanghel-playbook — patrones, decisiones de componentes y lecciones de software en producción, instalables desde la terminal.
 order: 1
 ---
 
 # Getting Started
 
-Welcome to **Sanghel Playbook**. This is a living document where I capture patterns,
-component decisions, and lessons learned building production software.
+Bienvenido a **Sanghel Playbook** — un catálogo vivo de patrones, configuraciones y guías que uso en proyectos de producción.
 
-## What you'll find here
+Puedes consumirlo de dos formas:
 
-- Component patterns and design decisions
-- Architecture notes and tradeoffs
-- Code snippets with context
+---
 
-## Running locally
+## CLI/TUI (recomendado)
 
-Clone the repo and start the dev server:
+Instala patrones directamente en tu proyecto desde la terminal, sin necesidad de copiar código manualmente.
 
 ```bash
-git clone https://github.com/Sanghel/sanghel-playbook
-cd sanghel-playbook
-pnpm install
-pnpm dev
+npx sanghel-playbook
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Al ejecutarlo, aparece una TUI interactiva con dos modos:
 
-## Adding a doc
+- **Crear nuevo proyecto** — scaffoldea React + Vite, Next.js o Astro con las herramientas oficiales, y luego ofrece aplicar patrones del catálogo encima.
+- **Añadir a proyecto existente** — navega el catálogo por categoría, selecciona los items que quieres (con espacio), y los instala en tu proyecto actual.
 
-Create a `.mdx` file inside `src/content/docs/`:
+El CLI detecta automáticamente tu package manager (`pnpm`, `yarn` o `npm`) e instala las dependencias necesarias.
 
-```mdx
+### ¿Qué instala?
+
+Cada item del catálogo puede instalar:
+- Archivos de código (hooks, componentes, schemas)
+- Guías y reglas en markdown
+- Dependencias npm requeridas
+
 ---
-title: My Topic
-description: A short description.
-order: 2
+
+## Documentación navegable (este site)
+
+Explora los patrones con contexto completo: por qué se usan, cuándo aplicarlos, y ejemplos de código. Usa el sidebar para navegar por categoría.
+
 ---
 
-# My Topic
+## Catálogo actual
 
-Write your content here.
-```
+El catálogo crece con cada nuevo patrón documentado. Actualmente incluye:
 
-<Callout variant="tip">
-  Use frontmatter `order` to control the position of a doc in the sidebar.
-</Callout>
+- **React** — patrones de componentes y formularios
+- **Next.js** — server actions, middleware, API routes, sessions
+- **Astro** — islands, routing, content collections
+- **Rules & Guides** — GitHub Flow, Deploy Guide (Vercel)
 
-<Callout variant="warning">
-  Always include a `title` in your frontmatter — the sidebar uses it to build navigation.
-</Callout>
+---
 
-## Syntax highlighting
+## Contribuir al catálogo
 
-Code blocks use Shiki with the `github-dark` theme:
+Para añadir un nuevo item:
 
-```typescript
-function greet(name: string): string {
-  return `Hello, ${name}!`
-}
-
-const message = greet('world')
-console.log(message)
-```
+1. Crear `catalog/{categoria}/{id}/manifest.json` con la metadata
+2. Añadir los archivos fuente en `catalog/{categoria}/{id}/files/`
+3. Crear la doc en `src/content/docs/catalog/{categoria}/{id}.mdx`
+4. Abrir un PR — catálogo y docs se actualizan en el mismo commit
