@@ -1,0 +1,15 @@
+{
+  "id": "deploy-guide",
+  "name": "Deploy Guide (Vercel)",
+  "description": "Checklist completo de deploy en Vercel: configuración, variables de entorno, monitoreo y rollback",
+  "category": "rules",
+  "tags": ["deploy", "vercel", "ci-cd", "checklist"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/deploy-guide.md", "dest": "rules/deploy-guide.md" }
+  ],
+  "docsUrl": "https://sanghel-playbook.vercel.app/docs/catalog/rules/deploy-guide"
+}
