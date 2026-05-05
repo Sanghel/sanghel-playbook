@@ -59,4 +59,8 @@ describe('getInstallCommand', () => {
   it('npm devDeps: npm install --save-dev', () => {
     expect(getInstallCommand('npm', ['vitest'], true)).toBe('npm install --save-dev vitest')
   })
+
+  it('lanza error si deps está vacío', () => {
+    expect(() => getInstallCommand('pnpm', [])).toThrow('deps must not be empty')
+  })
 })
