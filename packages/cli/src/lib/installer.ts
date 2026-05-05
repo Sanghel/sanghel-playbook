@@ -17,10 +17,15 @@ export async function installFiles(
       continue
     }
 
-    const content = await fetchFile(manifest.category, manifest.id, basename(file.src))
-    mkdirSync(dirname(destPath), { recursive: true })
-    writeFileSync(destPath, content, 'utf-8')
-    results.push({ path: file.dest, skipped: false })
+    try {
+      const content = await fetchFile(manifest.category, manifest.id, basename(file.src))
+      mkdirSync(dirname(destPath), { recursive: true })
+      writeFileSync(destPath, content, 'utf-8')
+      results.push({ path: file.dest, skipped: false })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      results.push({ path: file.dest, skipped: false, error: message })
+    }
   }
 
   return results

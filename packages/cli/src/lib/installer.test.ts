@@ -76,4 +76,12 @@ describe('installFiles', () => {
     expect(results).toHaveLength(2)
     expect(results.every(r => !r.skipped)).toBe(true)
   })
+
+  it('registra error en el resultado si fetchFile falla', async () => {
+    vi.mocked(fetcher.fetchFile).mockRejectedValueOnce(new Error('Network error fetching file'))
+
+    const results = await installFiles(mockManifest, tmpDir)
+    expect(results[0].skipped).toBe(false)
+    expect(results[0].error).toBe('Network error fetching file')
+  })
 })
