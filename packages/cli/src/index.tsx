@@ -37,18 +37,19 @@ function App() {
   )
 
   // spawnSync with stdio:'inherit' conflicts with Ink's TTY control.
-  // Exit Ink first, run the scaffolder in the raw terminal, then let the user
-  // re-run `npx sanghel-playbook` inside the new project to add patterns.
+  // Exit Ink first, defer createProject to let Ink finish teardown, then scaffold.
   const handleStackSelect = useCallback((stack: Stack) => {
     exit()
-    const name = `my-${stack}-app`
-    const ok = createProject(stack, name)
-    if (!ok) {
-      console.error('\n✗ Error al crear el proyecto.')
-      process.exit(1)
-    } else {
-      console.log(`\n✓ Proyecto creado. Entra al directorio y corre npx sanghel-playbook para añadir patrones.`)
-    }
+    setImmediate(() => {
+      const name = `my-${stack}-app`
+      const ok = createProject(stack, name)
+      if (!ok) {
+        console.error('\n✗ Error al crear el proyecto.')
+        process.exit(1)
+      } else {
+        console.log(`\n✓ Proyecto creado. Entra al directorio y corre npx sanghel-playbook para añadir patrones.`)
+      }
+    })
   }, [exit])
 
   const handleCategorySelect = useCallback(async (category: CategoryRef) => {
@@ -81,10 +82,11 @@ function App() {
     }
   }, [])
 
+  const shouldLoadCatalog = screen.id === 'loading' && screen.message === 'Cargando catálogo...'
+
   // Load catalog when entering loading screen for 'add' flow
   useEffect(() => {
-    if (screen.id !== 'loading') return
-    if (screen.message !== 'Cargando catálogo...') return
+    if (!shouldLoadCatalog) return
 
     loadCatalog()
       .then((categories) => {
@@ -94,7 +96,7 @@ function App() {
       .catch((err) => {
         setScreen({ id: 'error', message: `Error al cargar catálogo: ${String(err)}` })
       })
-  }, [screen])
+  }, [shouldLoadCatalog])
 
   if (screen.id === 'main-menu') {
     return <MainMenu onSelect={handleMainMenuSelect} />
@@ -150,8 +152,9 @@ function App() {
 
   if (screen.id === 'error') {
     return (
-      <Box padding={1}>
+      <Box flexDirection="column" padding={1}>
         <Text color="red">✗ {screen.message}</Text>
+        <Text dimColor>Ctrl+C para salir</Text>
       </Box>
     )
   }
