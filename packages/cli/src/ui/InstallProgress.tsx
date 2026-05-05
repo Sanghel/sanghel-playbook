@@ -33,7 +33,7 @@ export function InstallProgress({ steps, done, docsUrl }: Props) {
       </Text>
       <Text> </Text>
       {steps.map((step, i) => (
-        <Box key={i}>
+        <Box key={`${i}-${step.label}`}>
           {step.status === 'running' ? (
             <Text color="yellow">
               <Spinner type="dots" /> {step.label}

@@ -12,11 +12,24 @@ export function CategoryMenu({ categories, onSelect, onBack }: Props) {
   const [cursor, setCursor] = useState(0)
 
   useInput((_, key) => {
+    if (categories.length === 0) {
+      if (key.escape) onBack()
+      return
+    }
     if (key.upArrow) setCursor((c) => Math.max(0, c - 1))
     if (key.downArrow) setCursor((c) => Math.min(categories.length - 1, c + 1))
     if (key.return) onSelect(categories[cursor])
     if (key.escape) onBack()
   })
+
+  if (categories.length === 0) {
+    return (
+      <Box flexDirection="column" padding={1}>
+        <Text dimColor>No hay categorías disponibles.</Text>
+        <Text dimColor>esc volver</Text>
+      </Box>
+    )
+  }
 
   return (
     <Box flexDirection="column" padding={1}>

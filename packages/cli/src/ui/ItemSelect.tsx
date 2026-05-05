@@ -14,6 +14,10 @@ export function ItemSelect({ items, categoryLabel, onInstall, onBack }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   useInput((input, key) => {
+    if (items.length === 0) {
+      if (key.escape) onBack()
+      return
+    }
     if (key.upArrow) setCursor((c) => Math.max(0, c - 1))
     if (key.downArrow) setCursor((c) => Math.min(items.length - 1, c + 1))
     if (input === ' ') {
