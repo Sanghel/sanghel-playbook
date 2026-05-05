@@ -291,7 +291,7 @@ git commit -m "feat(cli): tipos compartidos (CatalogIndex, ManifestItem, etc.)"
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fetchJson, fetchText, fetchCatalogIndex, fetchCategoryIndex, fetchManifest, fetchFile } from './fetcher.js'
 
-const BASE = 'https://raw.githubusercontent.com/sanghelgonzalez/sanghel-playbook/main'
+const BASE = 'https://raw.githubusercontent.com/Sanghel/sanghel-playbook/main'
 
 global.fetch = vi.fn()
 
@@ -413,7 +413,7 @@ Expected: FAIL — "Cannot find module './fetcher.js'"
 ```typescript
 import type { CatalogIndex, CategoryIndex, ManifestItem } from '../types.js'
 
-const BASE_URL = 'https://raw.githubusercontent.com/sanghelgonzalez/sanghel-playbook/main'
+const BASE_URL = 'https://raw.githubusercontent.com/Sanghel/sanghel-playbook/main'
 
 export async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE_URL}/${path}`)
