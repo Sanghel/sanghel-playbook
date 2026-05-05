@@ -14,16 +14,18 @@ export interface CategoryIndex {
   items: string[]
 }
 
+export interface DepsMap {
+  dependencies: string[]
+  devDependencies: string[]
+}
+
 export interface ManifestItem {
   id: string
   name: string
   description: string
   category: string
   tags: string[]
-  deps: {
-    dependencies: string[]
-    devDependencies: string[]
-  }
+  deps: DepsMap
   files: FileEntry[]
   docsUrl: string
 }
@@ -36,6 +38,7 @@ export interface FileEntry {
 export interface InstallResult {
   path: string
   skipped: boolean
+  error?: string
 }
 
 export interface InstallStep {
