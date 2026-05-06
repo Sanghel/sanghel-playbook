@@ -2,6 +2,12 @@
   "name": "sanghel-playbook",
   "version": "0.1.0",
   "description": "CLI/TUI para instalar patrones y scaffoldear proyectos desde el sanghel-playbook",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sanghel/sanghel-playbook.git",
+    "directory": "packages/cli"
+  },
   "type": "module",
   "bin": {
     "sanghel-playbook": "./dist/index.js"
