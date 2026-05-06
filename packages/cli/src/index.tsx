@@ -66,6 +66,10 @@ function App() {
     }
   }, [])
 
+  const handleItemSelectBack = useCallback(() => {
+    setScreen({ id: 'category-menu', categories: categoriesRef.current })
+  }, [])
+
   const handleInstall = useCallback(async (manifests: ManifestItem[]) => {
     const steps: InstallStep[] = []
     setScreen({ id: 'install-progress', steps: [], done: false, docsUrl: null })
@@ -135,7 +139,7 @@ function App() {
         items={screen.items}
         categoryLabel={screen.category.label}
         onInstall={handleInstall}
-        onBack={() => setScreen({ id: 'category-menu', categories: categoriesRef.current })}
+        onBack={handleItemSelectBack}
       />
     )
   }
