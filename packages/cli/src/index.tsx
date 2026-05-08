@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { render, Box, Text, useApp } from 'ink'
 import { MainMenu } from './ui/MainMenu.js'
 import { StackMenu } from './ui/StackMenu.js'
+import { ProjectNameInput } from './ui/ProjectNameInput.js'
 import { CategoryMenu } from './ui/CategoryMenu.js'
 import { ItemSelect } from './ui/ItemSelect.js'
 import { InstallProgress } from './ui/InstallProgress.js'
@@ -13,6 +14,7 @@ import type { Stack } from './commands/create.js'
 type Screen =
   | { id: 'main-menu' }
   | { id: 'stack-menu' }
+  | { id: 'project-name'; stack: Stack }
   | { id: 'loading'; message: string }
   | { id: 'category-menu'; categories: CategoryRef[] }
   | { id: 'item-select'; category: CategoryRef; items: ManifestItem[] }
@@ -36,18 +38,21 @@ function App() {
     []
   )
 
+  const handleStackSelect = useCallback((stack: Stack) => {
+    setScreen({ id: 'project-name', stack })
+  }, [])
+
   // spawnSync with stdio:'inherit' conflicts with Ink's TTY control.
   // Exit Ink first, defer createProject to let Ink finish teardown, then scaffold.
-  const handleStackSelect = useCallback((stack: Stack) => {
+  const handleProjectNameConfirm = useCallback((stack: Stack, name: string) => {
     exit()
     setImmediate(() => {
-      const name = `my-${stack}-app`
       const ok = createProject(stack, name)
       if (!ok) {
         console.error('\n✗ Error al crear el proyecto.')
         process.exit(1)
       } else {
-        console.log(`\n✓ Proyecto creado. Entra al directorio y corre npx sanghel-playbook para añadir patrones.`)
+        console.log(`\n✓ Proyecto "${name}" creado. Entra al directorio y corre npx sanghel-playbook para añadir patrones.`)
       }
     })
   }, [exit])
@@ -111,6 +116,16 @@ function App() {
       <StackMenu
         onSelect={handleStackSelect}
         onBack={() => setScreen({ id: 'main-menu' })}
+      />
+    )
+  }
+
+  if (screen.id === 'project-name') {
+    return (
+      <ProjectNameInput
+        stack={screen.stack}
+        onConfirm={(name) => handleProjectNameConfirm(screen.stack, name)}
+        onBack={() => setScreen({ id: 'stack-menu' })}
       />
     )
   }
