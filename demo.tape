@@ -19,10 +19,14 @@ Set WindowBarSize 28
 Set BorderRadius  8
 Set LetterSpacing 0
 
-# Pequeña pausa inicial
-Sleep 400ms
+# Definir npx como alias del mock — invisible en la grabación
+Hide
+Type "npx() { bash demo-mock.sh; }"
+Enter
+Show
 
-Type "bash demo-mock.sh"
+Sleep 400ms
+Type "npx sanghel-playbook"
 Sleep 300ms
 Enter
 
