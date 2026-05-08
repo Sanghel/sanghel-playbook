@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { getAllDocs } from '@/lib/docs'
-import { TerminalFrame } from '@/components/TerminalFrame/TerminalFrame'
+import { TerminalFrame, TerminalFramePlaceholder } from '@/components/TerminalFrame/TerminalFrame'
 
 function hasDemoGif() {
   return existsSync(join(process.cwd(), 'public', 'demo.gif'))
@@ -68,20 +68,22 @@ export default function Home() {
           y añade patrones al instante — sin copiar código.
         </p>
 
-        <TerminalFrame>
-          {showDemo ? (
+        {showDemo ? (
+          <TerminalFrame>
             <Image
               src="/demo.gif"
               alt="Sanghel Playbook TUI demo"
-              width={780}
-              height={440}
+              width={820}
+              height={500}
               unoptimized
               priority
             />
-          ) : (
+          </TerminalFrame>
+        ) : (
+          <TerminalFramePlaceholder>
             <DemoPlaceholder />
-          )}
-        </TerminalFrame>
+          </TerminalFramePlaceholder>
+        )}
 
         <p className="mt-4 text-sm text-zinc-400 dark:text-zinc-500">
           <code className="font-mono text-xs bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">

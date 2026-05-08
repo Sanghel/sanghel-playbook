@@ -4,25 +4,27 @@
 
 Output public/demo.gif
 
-Set Shell        "bash"
-Set FontSize     14
-Set FontFamily   "JetBrains Mono"
-Set Width        820
-Set Height       480
-Set Theme        "Tokyo Night"
-Set Padding      24
+Set Shell         "bash"
+Set FontSize      13
+Set FontFamily    "Menlo"
+Set Width         760
+Set Height        500
+Set Theme         "TokyoNight"
+Set Padding       20
 Set PlaybackSpeed 1.0
-Set TypingSpeed  60ms
-Set CursorBlink  false
+Set TypingSpeed   50ms
+Set CursorBlink   false
+Set WindowBar     Colorful
+Set WindowBarSize 28
+Set BorderRadius  8
+Set LetterSpacing 0
 
-# Pequeña pausa inicial para que la terminal se vea limpia
+# Pequeña pausa inicial
 Sleep 400ms
 
-# Escribir el comando
 Type "bash demo-mock.sh"
 Sleep 300ms
 Enter
 
-# El script controla sus propios tiempos internos
-# Solo necesitamos esperar a que termine (~12s)
+# El script controla sus propios tiempos (~12s)
 Sleep 13s
