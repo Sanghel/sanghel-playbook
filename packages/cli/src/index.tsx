@@ -1,3 +1,4 @@
+import path from 'path'
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { render, Box, Text, useApp } from 'ink'
 import { MainMenu } from './ui/MainMenu.js'
@@ -6,7 +7,7 @@ import { ProjectNameInput } from './ui/ProjectNameInput.js'
 import { CategoryMenu } from './ui/CategoryMenu.js'
 import { ItemSelect } from './ui/ItemSelect.js'
 import { InstallProgress } from './ui/InstallProgress.js'
-import { loadCatalog, loadCategoryItems, runInstall } from './commands/add.js'
+import { loadCatalog, loadCategoryItems, loadItemsByStack, runInstall } from './commands/add.js'
 import { createProject } from './commands/create.js'
 import type { CategoryRef, ManifestItem, InstallStep } from './types.js'
 import type { Stack } from './commands/create.js'
@@ -16,6 +17,7 @@ type Screen =
   | { id: 'stack-menu' }
   | { id: 'project-name'; stack: Stack }
   | { id: 'loading'; message: string }
+  | { id: 'extra-select'; stack: Stack; projectName: string; items: ManifestItem[] }
   | { id: 'category-menu'; categories: CategoryRef[] }
   | { id: 'item-select'; category: CategoryRef; items: ManifestItem[] }
   | { id: 'install-progress'; steps: InstallStep[]; done: boolean; docsUrl: string | null }
@@ -42,18 +44,55 @@ function App() {
     setScreen({ id: 'project-name', stack })
   }, [])
 
-  // spawnSync with stdio:'inherit' conflicts with Ink's TTY control.
-  // Exit Ink first, defer createProject to let Ink finish teardown, then scaffold.
   const handleProjectNameConfirm = useCallback((stack: Stack, name: string) => {
+    setScreen({ id: 'loading', message: 'Cargando extras del catálogo...' })
+    loadItemsByStack(stack)
+      .then(async (items) => {
+        // Fall back to all catalog items if none match this stack
+        if (items.length === 0) {
+          const categories = await loadCatalog()
+          const all = await Promise.all(categories.map((c) => loadCategoryItems(c.id).catch(() => [] as ManifestItem[])))
+          items = all.flat()
+        }
+        if (items.length === 0) {
+          handleCreateWithExtras(stack, name, [])
+        } else {
+          setScreen({ id: 'extra-select', stack, projectName: name, items })
+        }
+      })
+      .catch(() => {
+        handleCreateWithExtras(stack, name, [])
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // spawnSync with stdio:'inherit' conflicts with Ink's TTY control.
+  // Exit Ink first, defer createProject to let Ink finish teardown, then scaffold + extras.
+  const handleCreateWithExtras = useCallback((stack: Stack, projectName: string, extras: ManifestItem[]) => {
     exit()
     setImmediate(() => {
-      const ok = createProject(stack, name)
-      if (!ok) {
-        console.error('\n✗ Error al crear el proyecto.')
-        process.exit(1)
-      } else {
-        console.log(`\n✓ Proyecto "${name}" creado. Entra al directorio y corre npx sanghel-playbook para añadir patrones.`)
-      }
+      void (async () => {
+        const ok = createProject(stack, projectName)
+        if (!ok) {
+          console.error('\n✗ Error al crear el proyecto.')
+          process.exit(1)
+          return
+        }
+
+        if (extras.length > 0) {
+          const projectCwd = path.join(process.cwd(), projectName)
+          console.log('\nInstalando extras...')
+          try {
+            await runInstall(extras, projectCwd, (step) => {
+              const icon = step.status === 'done' ? '✓' : step.status === 'error' ? '✗' : step.status === 'skipped' ? '⊘' : '…'
+              console.log(`  ${icon} ${step.label}`)
+            })
+          } catch (err) {
+            console.error(`  ✗ Error instalando extras: ${String(err)}`)
+          }
+        }
+
+        console.log(`\n✓ Proyecto "${projectName}" listo. Entra al directorio: cd ${projectName}`)
+      })()
     })
   }, [exit])
 
@@ -76,6 +115,7 @@ function App() {
   }, [])
 
   const handleInstall = useCallback(async (manifests: ManifestItem[]) => {
+    if (manifests.length === 0) return
     const steps: InstallStep[] = []
     setScreen({ id: 'install-progress', steps: [], done: false, docsUrl: null })
 
@@ -135,6 +175,19 @@ function App() {
       <Box padding={1}>
         <Text color="cyan">{screen.message}</Text>
       </Box>
+    )
+  }
+
+  if (screen.id === 'extra-select') {
+    const { stack, projectName, items } = screen
+    return (
+      <ItemSelect
+        items={items}
+        categoryLabel={`Extras para ${stack} — "${projectName}"`}
+        onInstall={(selected) => handleCreateWithExtras(stack, projectName, selected)}
+        onBack={() => setScreen({ id: 'project-name', stack })}
+        allowEmpty
+      />
     )
   }
 
