@@ -1,0 +1,5 @@
+{
+  "category": "templates",
+  "label": "Templates",
+  "items": ["react-vite", "nextjs"]
+}
