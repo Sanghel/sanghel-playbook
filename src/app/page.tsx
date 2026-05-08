@@ -1,12 +1,22 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import { getAllDocs } from '@/lib/docs'
+import { TerminalFrame } from '@/components/TerminalFrame/TerminalFrame'
+
+function hasDemoGif() {
+  return existsSync(join(process.cwd(), 'public', 'demo.gif'))
+}
 
 export default function Home() {
   const docs = getAllDocs()
   const firstDoc = docs[0]
+  const showDemo = hasDemoGif()
 
   return (
-    <div className="flex flex-col items-start max-w-2xl mx-auto px-6 py-16">
+    <div className="flex flex-col items-start max-w-3xl mx-auto px-6 py-16">
+      {/* Hero */}
       <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
         Personal Playbook
       </div>
@@ -20,7 +30,7 @@ export default function Home() {
         A living reference built in the open.
       </p>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 mb-20">
         {firstDoc ? (
           <Link
             href={`/docs/${firstDoc.slug.join('/')}`}
@@ -43,6 +53,73 @@ export default function Home() {
         >
           GitHub
         </a>
+      </div>
+
+      {/* Demo section */}
+      <div className="w-full">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          CLI / TUI
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
+          Instala patrones desde la terminal
+        </h2>
+        <p className="text-base text-zinc-500 dark:text-zinc-400 mb-8">
+          Crea proyectos con tu stack favorito, aplica templates con branding propio
+          y añade patrones al instante — sin copiar código.
+        </p>
+
+        <TerminalFrame>
+          {showDemo ? (
+            <Image
+              src="/demo.gif"
+              alt="Sanghel Playbook TUI demo"
+              width={780}
+              height={440}
+              unoptimized
+              priority
+            />
+          ) : (
+            <DemoPlaceholder />
+          )}
+        </TerminalFrame>
+
+        <p className="mt-4 text-sm text-zinc-400 dark:text-zinc-500">
+          <code className="font-mono text-xs bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+            npx sanghel-playbook
+          </code>
+          {' '}— funciona con npm, pnpm y yarn.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function DemoPlaceholder() {
+  return (
+    <div className="flex flex-col gap-3 p-6 min-h-[260px] justify-center font-mono text-sm">
+      <div className="flex gap-2 items-center">
+        <span className="text-zinc-600">$</span>
+        <span className="text-zinc-300">npx sanghel-playbook</span>
+      </div>
+      <div className="pl-4 flex flex-col gap-1 text-zinc-400">
+        <div>
+          <span className="text-green-400">▶</span>
+          {' '}Crear nuevo proyecto
+        </div>
+        <div className="text-zinc-600">  Añadir a proyecto existente</div>
+      </div>
+      <div className="pl-4 flex flex-col gap-1 text-zinc-400 mt-1">
+        <div className="text-zinc-500 text-xs">Selecciona el stack base:</div>
+        <div>
+          <span className="text-green-400">▶</span>
+          {' '}React + Vite
+          <span className="text-zinc-600 text-xs ml-2">Welcome module · components/ · hooks/</span>
+        </div>
+        <div className="text-zinc-600">  Next.js (create-next-app)</div>
+        <div className="text-zinc-600">  Astro</div>
+      </div>
+      <div className="mt-3 text-zinc-600 text-xs italic">
+        — Graba el GIF con: vhs demo.tape
       </div>
     </div>
   )
