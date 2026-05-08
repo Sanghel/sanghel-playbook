@@ -1,64 +1,89 @@
 .window {
   width: 100%;
-  max-width: 780px;
-  border-radius: 10px;
-  border: 1px solid #27272a;
-  background: #09090b;
+  max-width: 820px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #1a1b26;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px #18181b,
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 4px 20px rgba(0, 0, 0, 0.3);
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 32px 80px rgba(0, 0, 0, 0.4);
 }
+
+/* ── Title bar ─────────────────────────────────────────────────────── */
 
 .titlebar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1rem;
-  background: #18181b;
-  border-bottom: 1px solid #27272a;
+  height: 40px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, #2a2b3d 0%, #24253a 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   position: relative;
+  user-select: none;
 }
+
+/* ── Traffic lights ────────────────────────────────────────────────── */
 
 .dots {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
+  z-index: 1;
 }
 
-.dotRed,
-.dotYellow,
-.dotGreen {
+.dot {
   display: block;
   width: 12px;
   height: 12px;
   border-radius: 50%;
+  position: relative;
 }
 
-.dotRed    { background: #ff5f57; }
-.dotYellow { background: #ffbd2e; }
-.dotGreen  { background: #28c840; }
+/* Subtle inner highlight — gives a slightly 3-D look */
+.dot::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2.5px;
+  width: 5px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.dotRed    { background: #ff5f57; box-shadow: 0 0 0 0.5px rgba(255, 50, 40, 0.5); }
+.dotYellow { background: #febc2e; box-shadow: 0 0 0 0.5px rgba(230, 160, 0, 0.4); }
+.dotGreen  { background: #28c840; box-shadow: 0 0 0 0.5px rgba(0, 170, 40, 0.4); }
+
+/* ── Window title ──────────────────────────────────────────────────── */
 
 .title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.75rem;
-  color: #52525b;
-  font-family: 'Geist Mono', 'JetBrains Mono', monospace;
-  letter-spacing: 0.02em;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: -apple-system, 'SF Pro Text', 'Geist', system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
   pointer-events: none;
 }
+
+/* ── Body ──────────────────────────────────────────────────────────── */
 
 .body {
   padding: 0;
   line-height: 0;
+  background: #1a1b26;
 }
 
 .body img {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 0 0 9px 9px;
+  border-radius: 0 0 11px 11px;
 }
