@@ -7,9 +7,10 @@ interface Props {
   categoryLabel: string
   onInstall: (selected: ManifestItem[]) => void
   onBack: () => void
+  allowEmpty?: boolean
 }
 
-export function ItemSelect({ items, categoryLabel, onInstall, onBack }: Props) {
+export function ItemSelect({ items, categoryLabel, onInstall, onBack, allowEmpty = false }: Props) {
   const [cursor, setCursor] = useState(0)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -31,7 +32,7 @@ export function ItemSelect({ items, categoryLabel, onInstall, onBack }: Props) {
     }
     if (key.return) {
       const toInstall = items.filter((item) => selected.has(item.id))
-      if (toInstall.length > 0) onInstall(toInstall)
+      if (toInstall.length > 0 || allowEmpty) onInstall(toInstall)
     }
     if (key.escape) onBack()
   })
@@ -55,7 +56,9 @@ export function ItemSelect({ items, categoryLabel, onInstall, onBack }: Props) {
         </Box>
       ))}
       <Text> </Text>
-      <Text dimColor>↑↓ navegar  espacio seleccionar  enter instalar  esc volver</Text>
+      <Text dimColor>
+        ↑↓ navegar  espacio seleccionar  enter {allowEmpty && selected.size === 0 ? 'continuar sin extras' : 'instalar'}  esc volver
+      </Text>
       {selected.size > 0 && (
         <Text color="yellow">{selected.size} item(s) seleccionado(s)</Text>
       )}
