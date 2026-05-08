@@ -19,9 +19,11 @@ Set WindowBarSize 28
 Set BorderRadius  8
 Set LetterSpacing 0
 
-# Definir npx como alias del mock — invisible en la grabación
+# Definir npx y limpiar pantalla — invisible en la grabación
 Hide
 Type "npx() { bash demo-mock.sh; }"
+Enter
+Type "clear"
 Enter
 Show
 
