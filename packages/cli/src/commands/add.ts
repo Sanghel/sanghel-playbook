@@ -14,6 +14,14 @@ export async function loadCategoryItems(categoryId: string): Promise<ManifestIte
   return Promise.all(catIndex.items.map((id) => fetchManifest(categoryId, id)))
 }
 
+export async function loadItemsByStack(stack: string): Promise<ManifestItem[]> {
+  const categories = await loadCatalog()
+  const allItemsNested = await Promise.all(
+    categories.map((cat) => loadCategoryItems(cat.id).catch(() => [] as ManifestItem[]))
+  )
+  return allItemsNested.flat().filter((item) => item.tags.includes(stack))
+}
+
 export async function runInstall(
   manifests: ManifestItem[],
   cwd: string,
