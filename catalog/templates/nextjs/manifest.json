@@ -1,0 +1,18 @@
+{
+  "id": "nextjs",
+  "name": "Sanghel Next.js Template",
+  "description": "Template base con Welcome module, estructura de carpetas (components, hooks) y useLocalStorage hook",
+  "category": "templates",
+  "tags": ["nextjs", "next.js", "react", "template"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/app/page.tsx", "dest": "src/app/page.tsx" },
+    { "src": "files/src/components/Welcome/Welcome.tsx", "dest": "src/components/Welcome/Welcome.tsx" },
+    { "src": "files/src/components/Welcome/Welcome.module.css", "dest": "src/components/Welcome/Welcome.module.css" },
+    { "src": "files/src/hooks/useLocalStorage.ts", "dest": "src/hooks/useLocalStorage.ts" }
+  ],
+  "docsUrl": "https://sanghel-playbook.vercel.app/docs/getting-started"
+}

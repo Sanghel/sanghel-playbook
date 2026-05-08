@@ -1,5 +1,5 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
-import { join, dirname, basename } from 'path'
+import { join, dirname } from 'path'
 import { fetchFile } from './fetcher.js'
 import type { ManifestItem, InstallResult } from '../types.js'
 
@@ -18,7 +18,10 @@ export async function installFiles(
     }
 
     try {
-      const content = await fetchFile(manifest.category, manifest.id, basename(file.src))
+      // file.src is relative to the item root (e.g. "files/src/components/Welcome.tsx")
+      // strip the leading "files/" prefix to get the sub-path within the files/ directory
+      const subPath = file.src.replace(/^files\//, '')
+      const content = await fetchFile(manifest.category, manifest.id, subPath)
       mkdirSync(dirname(destPath), { recursive: true })
       writeFileSync(destPath, content, 'utf-8')
       results.push({ path: file.dest, skipped: false })
