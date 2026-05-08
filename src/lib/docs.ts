@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-import type { NavGroup, NavSubSection, NavItem } from '@/components/Sidebar/types'
+import type { NavGroup, NavItem } from '@/components/Sidebar/types'
 
 const DOCS_DIR = path.join(process.cwd(), 'src/content/docs')
 
