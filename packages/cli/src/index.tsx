@@ -8,7 +8,7 @@ import { CategoryMenu } from './ui/CategoryMenu.js'
 import { ItemSelect } from './ui/ItemSelect.js'
 import { InstallProgress } from './ui/InstallProgress.js'
 import { loadCatalog, loadCategoryItems, loadItemsByStack, runInstall } from './commands/add.js'
-import { createProject } from './commands/create.js'
+import { createProject, applyTemplate } from './commands/create.js'
 import type { CategoryRef, ManifestItem, InstallStep } from './types.js'
 import type { Stack } from './commands/create.js'
 
@@ -78,14 +78,23 @@ function App() {
           return
         }
 
+        const projectCwd = path.join(process.cwd(), projectName)
+        const logStep = (step: { label: string; status: string }) => {
+          const icon = step.status === 'done' ? '✓' : step.status === 'error' ? '✗' : step.status === 'skipped' ? '⊘' : '…'
+          console.log(`  ${icon} ${step.label}`)
+        }
+
+        console.log('\nAplicando template Sanghel...')
+        try {
+          await applyTemplate(stack, projectCwd, logStep)
+        } catch (err) {
+          console.error(`  ✗ Error aplicando template: ${String(err)}`)
+        }
+
         if (extras.length > 0) {
-          const projectCwd = path.join(process.cwd(), projectName)
           console.log('\nInstalando extras...')
           try {
-            await runInstall(extras, projectCwd, (step) => {
-              const icon = step.status === 'done' ? '✓' : step.status === 'error' ? '✗' : step.status === 'skipped' ? '⊘' : '…'
-              console.log(`  ${icon} ${step.label}`)
-            })
+            await runInstall(extras, projectCwd, logStep)
           } catch (err) {
             console.error(`  ✗ Error instalando extras: ${String(err)}`)
           }

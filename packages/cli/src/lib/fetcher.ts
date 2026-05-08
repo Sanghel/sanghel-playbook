@@ -36,6 +36,6 @@ export async function fetchManifest(categoryId: string, itemId: string): Promise
   return fetchJson<ManifestItem>(`catalog/${categoryId}/${itemId}/manifest.json`)
 }
 
-export async function fetchFile(categoryId: string, itemId: string, filename: string): Promise<string> {
-  return fetchText(`catalog/${categoryId}/${itemId}/files/${filename}`)
+export async function fetchFile(categoryId: string, itemId: string, subPath: string): Promise<string> {
+  return fetchText(`catalog/${categoryId}/${itemId}/files/${subPath}`)
 }

@@ -1,0 +1,18 @@
+{
+  "id": "react-vite",
+  "name": "Sanghel React + Vite Template",
+  "description": "Template base con Welcome module, estructura de carpetas (components, hooks) y useLocalStorage hook",
+  "category": "templates",
+  "tags": ["react-vite", "react", "vite", "template"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/App.tsx", "dest": "src/App.tsx" },
+    { "src": "files/src/components/Welcome/Welcome.tsx", "dest": "src/components/Welcome/Welcome.tsx" },
+    { "src": "files/src/components/Welcome/Welcome.module.css", "dest": "src/components/Welcome/Welcome.module.css" },
+    { "src": "files/src/hooks/useLocalStorage.ts", "dest": "src/hooks/useLocalStorage.ts" }
+  ],
+  "docsUrl": "https://sanghel-playbook.vercel.app/docs/getting-started"
+}
