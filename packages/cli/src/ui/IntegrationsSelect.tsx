@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import type { ManifestItem } from '../types.js'
+import type { Integration } from '../types.js'
 
 interface Props {
-  items: ManifestItem[]
+  items: Integration[]
   framework: string
-  onConfirm: (selected: ManifestItem[]) => void
+  onConfirm: (selected: Integration[]) => void
   onBack: () => void
 }
 
@@ -16,6 +16,7 @@ export function IntegrationsSelect({ items, framework, onConfirm, onBack }: Prop
   useInput((input, key) => {
     if (items.length === 0) {
       if (key.escape) onBack()
+      if (key.return) onConfirm([])
       return
     }
     if (key.upArrow) setCursor((c) => Math.max(0, c - 1))
@@ -59,7 +60,11 @@ export function IntegrationsSelect({ items, framework, onConfirm, onBack }: Prop
         ))
       )}
       <Text> </Text>
-      <Text dimColor>↑↓ navegar  espacio seleccionar  enter confirmar  esc volver</Text>
+      {items.length === 0 ? (
+        <Text dimColor>enter continuar  esc volver</Text>
+      ) : (
+        <Text dimColor>↑↓ navegar  espacio seleccionar  enter confirmar  esc volver</Text>
+      )}
       {selected.size > 0 && (
         <Text color="yellow">{selected.size} integración(es) seleccionada(s)</Text>
       )}

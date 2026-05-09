@@ -8,6 +8,7 @@ import type { Stack } from '../lib/scaffolder.js'
 export type { Stack }
 
 export function createProject(stack: Stack, projectName: string, pkgManager?: PackageManager): boolean {
+  // TODO Phase 2: pass pkgManager to scaffold so initial install uses the selected PM
   return scaffold(stack, projectName)
 }
 
@@ -33,6 +34,7 @@ export async function applyTemplate(
     return
   }
 
+  // TODO Phase 2: use pkgManager for dep installation
   const results = await installFiles(manifest, projectCwd)
   for (const result of results) {
     onStep({

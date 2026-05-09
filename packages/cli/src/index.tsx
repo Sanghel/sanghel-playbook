@@ -11,8 +11,7 @@ import { IntegrationsSelect } from './ui/IntegrationsSelect.js'
 import { InstallProgress } from './ui/InstallProgress.js'
 import { loadCatalog, loadCategoryItems, loadItemsByStack, runInstall } from './commands/add.js'
 import { createProject, applyTemplate } from './commands/create.js'
-import type { CategoryRef, ManifestItem, InstallStep } from './types.js'
-import type { PackageManager } from './lib/package-manager.js'
+import type { CategoryRef, ManifestItem, InstallStep, PackageManager } from './types.js'
 import type { Stack } from './commands/create.js'
 
 type Screen =
