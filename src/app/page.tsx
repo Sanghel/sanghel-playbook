@@ -85,14 +85,16 @@ export default function Home() {
           >
             GitHub
           </a>
-          <span>·</span>
           {firstDoc && (
-            <Link
-              href={`/docs/${firstDoc.slug.join('/')}`}
-              className="hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
-            >
-              Documentación
-            </Link>
+            <>
+              <span>·</span>
+              <Link
+                href={`/docs/${firstDoc.slug.join('/')}`}
+                className="hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+              >
+                Documentación
+              </Link>
+            </>
           )}
           <span>·</span>
           <span>npm · pnpm · yarn</span>

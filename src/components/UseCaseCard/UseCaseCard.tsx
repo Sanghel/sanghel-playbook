@@ -6,7 +6,7 @@ interface UseCaseCardProps {
 
 export function UseCaseCard({ title, description, chips }: UseCaseCardProps) {
   return (
-    <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
       <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
         {title}
       </h3>
