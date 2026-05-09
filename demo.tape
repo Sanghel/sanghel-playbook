@@ -32,5 +32,5 @@ Type "npx sanghel-playbook"
 Sleep 300ms
 Enter
 
-# El script controla sus propios tiempos (~12s)
-Sleep 13s
+# El script controla sus propios tiempos (~22s con el flujo completo)
+Sleep 23s

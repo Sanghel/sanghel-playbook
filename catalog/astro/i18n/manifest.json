@@ -1,0 +1,23 @@
+{
+  "id": "i18n",
+  "name": "Astro i18n (built-in)",
+  "description": "Internacionalización con el módulo i18n nativo de Astro — rutas localizadas, archivos de strings y helper de traducción sin dependencias externas",
+  "category": "astro",
+  "tags": ["astro", "i18n", "internationalization"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/i18n/ui.ts", "dest": "src/i18n/ui.ts" },
+    { "src": "files/src/i18n/utils.ts", "dest": "src/i18n/utils.ts" }
+  ],
+  "patches": [
+    {
+      "file": "astro.config.mjs",
+      "operation": "append",
+      "content": "\n// i18n — añade esto dentro del objeto defineConfig:\n// i18n: { defaultLocale: 'es', locales: ['es', 'en'] }"
+    }
+  ],
+  "docsUrl": "https://docs.astro.build/en/guides/internationalization/"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "i18n",
+  "name": "i18next + react-i18next",
+  "description": "Internacionalización con i18next y react-i18next — configuración cliente, archivos de traducción ES/EN y hook useTranslation",
+  "category": "nextjs",
+  "tags": ["nextjs", "i18n", "internationalization", "i18next"],
+  "deps": {
+    "dependencies": ["i18next", "react-i18next", "i18next-browser-languagedetector"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/i18n/config.ts", "dest": "src/i18n/config.ts" },
+    { "src": "files/src/i18n/locales/es.json", "dest": "src/i18n/locales/es.json" },
+    { "src": "files/src/i18n/locales/en.json", "dest": "src/i18n/locales/en.json" }
+  ],
+  "patches": [],
+  "docsUrl": "https://react.i18next.com/latest/using-with-hooks"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "currency",
+  "name": "Currency Helpers",
+  "description": "Funciones de formato para valores monetarios usando Intl.NumberFormat — sin dependencias externas",
+  "category": "react",
+  "tags": ["react-vite", "utils", "currency", "formatting"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/utils/currency.ts", "dest": "src/utils/currency.ts" }
+  ],
+  "patches": [],
+  "docsUrl": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat"
+}

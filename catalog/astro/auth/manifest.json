@@ -1,0 +1,20 @@
+{
+  "id": "auth",
+  "name": "Lucia Auth v3",
+  "description": "Autenticación con Lucia Auth v3 para Astro — sesiones basadas en cookies, adaptador SQLite y rutas de login/logout",
+  "category": "astro",
+  "tags": ["astro", "auth", "authentication", "lucia"],
+  "deps": {
+    "dependencies": ["lucia", "@lucia-auth/adapter-sqlite", "better-sqlite3"],
+    "devDependencies": ["@types/better-sqlite3"]
+  },
+  "files": [
+    { "src": "files/src/lib/auth.ts", "dest": "src/lib/auth.ts" },
+    { "src": "files/src/lib/db.ts", "dest": "src/lib/db.ts" },
+    { "src": "files/src/pages/api/auth/login.ts", "dest": "src/pages/api/auth/login.ts" },
+    { "src": "files/src/pages/api/auth/logout.ts", "dest": "src/pages/api/auth/logout.ts" },
+    { "src": "files/src/middleware.ts", "dest": "src/middleware.ts" }
+  ],
+  "patches": [],
+  "docsUrl": "https://lucia-auth.com/getting-started/astro"
+}

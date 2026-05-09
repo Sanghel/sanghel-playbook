@@ -3,21 +3,24 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { render, Box, Text, useApp } from 'ink'
 import { MainMenu } from './ui/MainMenu.js'
 import { StackMenu } from './ui/StackMenu.js'
+import { PackageManagerMenu } from './ui/PackageManagerMenu.js'
 import { ProjectNameInput } from './ui/ProjectNameInput.js'
 import { CategoryMenu } from './ui/CategoryMenu.js'
 import { ItemSelect } from './ui/ItemSelect.js'
+import { IntegrationsSelect } from './ui/IntegrationsSelect.js'
 import { InstallProgress } from './ui/InstallProgress.js'
 import { loadCatalog, loadCategoryItems, loadItemsByStack, runInstall } from './commands/add.js'
 import { createProject, applyTemplate } from './commands/create.js'
-import type { CategoryRef, ManifestItem, InstallStep } from './types.js'
+import type { CategoryRef, ManifestItem, InstallStep, PackageManager } from './types.js'
 import type { Stack } from './commands/create.js'
 
 type Screen =
   | { id: 'main-menu' }
   | { id: 'stack-menu' }
-  | { id: 'project-name'; stack: Stack }
+  | { id: 'pkg-manager'; stack: Stack }
+  | { id: 'project-name'; stack: Stack; pkgManager: PackageManager }
   | { id: 'loading'; message: string }
-  | { id: 'extra-select'; stack: Stack; projectName: string; items: ManifestItem[] }
+  | { id: 'integrations-select'; stack: Stack; pkgManager: PackageManager; projectName: string; items: ManifestItem[] }
   | { id: 'category-menu'; categories: CategoryRef[] }
   | { id: 'item-select'; category: CategoryRef; items: ManifestItem[] }
   | { id: 'install-progress'; steps: InstallStep[]; done: boolean; docsUrl: string | null }
@@ -41,11 +44,15 @@ function App() {
   )
 
   const handleStackSelect = useCallback((stack: Stack) => {
-    setScreen({ id: 'project-name', stack })
+    setScreen({ id: 'pkg-manager', stack })
   }, [])
 
-  const handleProjectNameConfirm = useCallback((stack: Stack, name: string) => {
-    setScreen({ id: 'loading', message: 'Cargando extras del catálogo...' })
+  const handlePkgManagerSelect = useCallback((stack: Stack, pkgManager: PackageManager) => {
+    setScreen({ id: 'project-name', stack, pkgManager })
+  }, [])
+
+  const handleProjectNameConfirm = useCallback((stack: Stack, pkgManager: PackageManager, name: string) => {
+    setScreen({ id: 'loading', message: 'Cargando integraciones del catálogo...' })
     loadItemsByStack(stack)
       .then(async (items) => {
         // Fall back to all catalog items if none match this stack
@@ -54,24 +61,21 @@ function App() {
           const all = await Promise.all(categories.map((c) => loadCategoryItems(c.id).catch(() => [] as ManifestItem[])))
           items = all.flat()
         }
-        if (items.length === 0) {
-          handleCreateWithExtras(stack, name, [])
-        } else {
-          setScreen({ id: 'extra-select', stack, projectName: name, items })
-        }
+        setScreen({ id: 'integrations-select', stack, pkgManager, projectName: name, items })
       })
       .catch(() => {
-        handleCreateWithExtras(stack, name, [])
+        // On error, skip integrations and create directly
+        setScreen({ id: 'integrations-select', stack, pkgManager, projectName: name, items: [] })
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // spawnSync with stdio:'inherit' conflicts with Ink's TTY control.
   // Exit Ink first, defer createProject to let Ink finish teardown, then scaffold + extras.
-  const handleCreateWithExtras = useCallback((stack: Stack, projectName: string, extras: ManifestItem[]) => {
+  const handleCreateWithExtras = useCallback((stack: Stack, projectName: string, extras: ManifestItem[], pkgManager: PackageManager) => {
     exit()
     setImmediate(() => {
       void (async () => {
-        const ok = createProject(stack, projectName)
+        const ok = createProject(stack, projectName, pkgManager)
         if (!ok) {
           console.error('\n✗ Error al crear el proyecto.')
           process.exit(1)
@@ -86,17 +90,17 @@ function App() {
 
         console.log('\nAplicando template Sanghel...')
         try {
-          await applyTemplate(stack, projectCwd, logStep)
+          await applyTemplate(stack, projectCwd, pkgManager, logStep)
         } catch (err) {
           console.error(`  ✗ Error aplicando template: ${String(err)}`)
         }
 
         if (extras.length > 0) {
-          console.log('\nInstalando extras...')
+          console.log('\nInstalando integraciones...')
           try {
             await runInstall(extras, projectCwd, logStep)
           } catch (err) {
-            console.error(`  ✗ Error instalando extras: ${String(err)}`)
+            console.error(`  ✗ Error instalando integraciones: ${String(err)}`)
           }
         }
 
@@ -169,12 +173,23 @@ function App() {
     )
   }
 
+  if (screen.id === 'pkg-manager') {
+    const { stack } = screen
+    return (
+      <PackageManagerMenu
+        onSelect={(pm) => handlePkgManagerSelect(stack, pm)}
+        onBack={() => setScreen({ id: 'stack-menu' })}
+      />
+    )
+  }
+
   if (screen.id === 'project-name') {
+    const { stack, pkgManager } = screen
     return (
       <ProjectNameInput
-        stack={screen.stack}
-        onConfirm={(name) => handleProjectNameConfirm(screen.stack, name)}
-        onBack={() => setScreen({ id: 'stack-menu' })}
+        stack={stack}
+        onConfirm={(name) => handleProjectNameConfirm(stack, pkgManager, name)}
+        onBack={() => setScreen({ id: 'pkg-manager', stack })}
       />
     )
   }
@@ -187,15 +202,14 @@ function App() {
     )
   }
 
-  if (screen.id === 'extra-select') {
-    const { stack, projectName, items } = screen
+  if (screen.id === 'integrations-select') {
+    const { stack, pkgManager, projectName, items } = screen
     return (
-      <ItemSelect
+      <IntegrationsSelect
         items={items}
-        categoryLabel={`Extras para ${stack} — "${projectName}"`}
-        onInstall={(selected) => handleCreateWithExtras(stack, projectName, selected)}
-        onBack={() => setScreen({ id: 'project-name', stack })}
-        allowEmpty
+        framework={stack}
+        onConfirm={(selected) => handleCreateWithExtras(stack, projectName, selected, pkgManager)}
+        onBack={() => setScreen({ id: 'project-name', stack, pkgManager })}
       />
     )
   }

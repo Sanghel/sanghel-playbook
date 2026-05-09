@@ -1,0 +1,17 @@
+{
+  "id": "react-hook-form",
+  "name": "React Hook Form + Zod",
+  "description": "React Hook Form con validación Zod y FormBuilder genérico listo para usar",
+  "category": "react",
+  "tags": ["react-vite", "forms", "react-hook-form", "zod"],
+  "deps": {
+    "dependencies": ["react-hook-form", "zod", "@hookform/resolvers"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/components/FormBuilder/FormBuilder.tsx", "dest": "src/components/FormBuilder/FormBuilder.tsx" },
+    { "src": "files/src/components/FormBuilder/index.ts", "dest": "src/components/FormBuilder/index.ts" }
+  ],
+  "patches": [],
+  "docsUrl": "https://react-hook-form.com/get-started"
+}

@@ -1,0 +1,7 @@
+{
+  "welcome": "Bienvenido",
+  "hello": "Hola, {{name}}",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "loading": "Cargando..."
+}

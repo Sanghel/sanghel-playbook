@@ -1,0 +1,29 @@
+{
+  "id": "ui-mui",
+  "name": "Material UI (MUI)",
+  "description": "Material UI v6 con ThemeRegistry para App Router, tema base configurado en modo oscuro/claro",
+  "category": "nextjs",
+  "tags": ["nextjs", "ui", "mui", "material-ui"],
+  "deps": {
+    "dependencies": ["@mui/material", "@mui/material-nextjs", "@emotion/react", "@emotion/styled", "@emotion/cache"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/components/ThemeRegistry.tsx", "dest": "src/components/ThemeRegistry.tsx" },
+    { "src": "files/src/theme/muiTheme.ts", "dest": "src/theme/muiTheme.ts" }
+  ],
+  "patches": [
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "append-import",
+      "content": "import { ThemeRegistry } from '@/components/ThemeRegistry'"
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "replace",
+      "marker": "{children}",
+      "content": "<ThemeRegistry>{children}</ThemeRegistry>"
+    }
+  ],
+  "docsUrl": "https://mui.com/material-ui/integrations/nextjs/"
+}

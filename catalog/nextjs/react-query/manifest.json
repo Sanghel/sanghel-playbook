@@ -1,0 +1,30 @@
+{
+  "id": "react-query",
+  "name": "React Query (TanStack Query v5)",
+  "description": "TanStack Query v5 con QueryClient global, hooks de ejemplo useQuery/useMutation y QueryProvider listo para App Router",
+  "category": "nextjs",
+  "tags": ["nextjs", "react-query", "data-fetching", "tanstack"],
+  "deps": {
+    "dependencies": ["@tanstack/react-query"],
+    "devDependencies": ["@tanstack/react-query-devtools"]
+  },
+  "files": [
+    { "src": "files/src/lib/queryClient.ts", "dest": "src/lib/queryClient.ts" },
+    { "src": "files/src/providers/QueryProvider.tsx", "dest": "src/providers/QueryProvider.tsx" },
+    { "src": "files/src/hooks/useQueryHooks.ts", "dest": "src/hooks/useQueryHooks.ts" }
+  ],
+  "patches": [
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "append-import",
+      "content": "import { QueryProvider } from '@/providers/QueryProvider'"
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "replace",
+      "marker": "{children}",
+      "content": "<QueryProvider>{children}</QueryProvider>"
+    }
+  ],
+  "docsUrl": "https://tanstack.com/query/latest/docs/framework/react/overview"
+}
