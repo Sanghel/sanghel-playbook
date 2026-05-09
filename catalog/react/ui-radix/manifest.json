@@ -1,0 +1,18 @@
+{
+  "id": "ui-radix",
+  "name": "Radix UI Primitives",
+  "description": "Radix UI con componentes base sin estilos — Button, Dialog y Popover listos para personalizar",
+  "category": "react",
+  "tags": ["react-vite", "ui", "radix", "radix-ui", "primitives"],
+  "deps": {
+    "dependencies": ["@radix-ui/react-dialog", "@radix-ui/react-popover", "@radix-ui/react-slot"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/components/ui/Button.tsx", "dest": "src/components/ui/Button.tsx" },
+    { "src": "files/src/components/ui/Dialog.tsx", "dest": "src/components/ui/Dialog.tsx" },
+    { "src": "files/src/components/ui/Popover.tsx", "dest": "src/components/ui/Popover.tsx" }
+  ],
+  "patches": [],
+  "docsUrl": "https://www.radix-ui.com/primitives/docs/overview/introduction"
+}

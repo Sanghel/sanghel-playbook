@@ -1,0 +1,31 @@
+{
+  "id": "react-router",
+  "name": "React Router DOM",
+  "description": "React Router DOM v6 con BrowserRouter, rutas base y páginas de ejemplo — Home, About y 404",
+  "category": "react",
+  "tags": ["react-vite", "routing", "react-router", "react-router-dom"],
+  "deps": {
+    "dependencies": ["react-router-dom"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/router/index.tsx", "dest": "src/router/index.tsx" },
+    { "src": "files/src/pages/Home.tsx", "dest": "src/pages/Home.tsx" },
+    { "src": "files/src/pages/About.tsx", "dest": "src/pages/About.tsx" },
+    { "src": "files/src/pages/NotFound.tsx", "dest": "src/pages/NotFound.tsx" }
+  ],
+  "patches": [
+    {
+      "file": "src/main.tsx",
+      "operation": "append-import",
+      "content": "import { AppRouter } from './router'"
+    },
+    {
+      "file": "src/main.tsx",
+      "operation": "replace",
+      "marker": "<App />",
+      "content": "<AppRouter />"
+    }
+  ],
+  "docsUrl": "https://reactrouter.com/en/main/start/tutorial"
+}
