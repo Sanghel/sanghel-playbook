@@ -1,5 +1,5 @@
 {
   "category": "react",
   "label": "React",
-  "items": []
+  "items": ["react-query", "react-hook-form", "ui-antd", "ui-mui", "ui-radix", "i18n", "react-router", "zustand", "redux", "dayjs", "currency"]
 }

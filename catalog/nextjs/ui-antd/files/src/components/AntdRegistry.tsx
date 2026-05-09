@@ -2,9 +2,10 @@
 import { createCache, extractStyle, StyleProvider } from '@ant-design/cssinjs'
 import type Entity from '@ant-design/cssinjs/es/Cache'
 import { useServerInsertedHTML } from 'next/navigation'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
+import type { ReactNode } from 'react'
 
-export function AntdRegistry({ children }: { children: React.ReactNode }) {
+export function AntdRegistry({ children }: { children: ReactNode }) {
   const cache = useRef<Entity | null>(null)
   if (!cache.current) cache.current = createCache()
 

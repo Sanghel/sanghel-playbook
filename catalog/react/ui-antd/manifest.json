@@ -1,0 +1,29 @@
+{
+  "id": "ui-antd",
+  "name": "Ant Design",
+  "description": "Ant Design con ConfigProvider y tema global configurado para React+Vite — sin necesidad de SSR registry",
+  "category": "react",
+  "tags": ["react-vite", "ui", "antd", "ant-design"],
+  "deps": {
+    "dependencies": ["antd"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/theme/antdTheme.ts", "dest": "src/theme/antdTheme.ts" },
+    { "src": "files/src/providers/AntdProvider.tsx", "dest": "src/providers/AntdProvider.tsx" }
+  ],
+  "patches": [
+    {
+      "file": "src/main.tsx",
+      "operation": "append-import",
+      "content": "import { AntdProvider } from './providers/AntdProvider'"
+    },
+    {
+      "file": "src/main.tsx",
+      "operation": "replace",
+      "marker": "<App />",
+      "content": "<AntdProvider><App /></AntdProvider>"
+    }
+  ],
+  "docsUrl": "https://ant.design/docs/react/introduce"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "dayjs",
+  "name": "Day.js",
+  "description": "Day.js con helpers para formatear fechas, calcular tiempo relativo y parsear strings",
+  "category": "react",
+  "tags": ["react-vite", "dates", "dayjs"],
+  "deps": {
+    "dependencies": ["dayjs"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/utils/date.ts", "dest": "src/utils/date.ts" }
+  ],
+  "patches": [],
+  "docsUrl": "https://day.js.org/docs/en/installation/installation"
+}

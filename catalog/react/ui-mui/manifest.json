@@ -1,0 +1,29 @@
+{
+  "id": "ui-mui",
+  "name": "Material UI (MUI)",
+  "description": "Material UI v6 con MuiProvider, tema base configurado en modo claro — sin dependencias de App Router",
+  "category": "react",
+  "tags": ["react-vite", "ui", "mui", "material-ui"],
+  "deps": {
+    "dependencies": ["@mui/material", "@emotion/react", "@emotion/styled"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/theme/muiTheme.ts", "dest": "src/theme/muiTheme.ts" },
+    { "src": "files/src/providers/MuiProvider.tsx", "dest": "src/providers/MuiProvider.tsx" }
+  ],
+  "patches": [
+    {
+      "file": "src/main.tsx",
+      "operation": "append-import",
+      "content": "import { MuiProvider } from './providers/MuiProvider'"
+    },
+    {
+      "file": "src/main.tsx",
+      "operation": "replace",
+      "marker": "<App />",
+      "content": "<MuiProvider><App /></MuiProvider>"
+    }
+  ],
+  "docsUrl": "https://mui.com/material-ui/getting-started/"
+}
