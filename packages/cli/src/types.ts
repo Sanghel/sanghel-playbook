@@ -1,3 +1,5 @@
+export type { PackageManager } from './lib/package-manager.js'
+
 export interface CatalogIndex {
   categories: CategoryRef[]
 }
@@ -19,6 +21,14 @@ export interface DepsMap {
   devDependencies: string[]
 }
 
+export type PatchOperation = 'prepend' | 'append' | 'append-import'
+
+export interface ManifestPatch {
+  file: string
+  operation: PatchOperation
+  content: string
+}
+
 export interface ManifestItem {
   id: string
   name: string
@@ -28,7 +38,11 @@ export interface ManifestItem {
   deps: DepsMap
   files: FileEntry[]
   docsUrl: string
+  patches?: ManifestPatch[]
 }
+
+// Semantic alias — same shape as ManifestItem, used in the integrations select flow
+export type Integration = ManifestItem
 
 export interface FileEntry {
   src: string

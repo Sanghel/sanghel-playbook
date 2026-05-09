@@ -1,12 +1,13 @@
 import { fetchManifest } from '../lib/fetcher.js'
 import { installFiles } from '../lib/installer.js'
 import { scaffold } from '../lib/scaffolder.js'
+import type { PackageManager } from '../lib/package-manager.js'
 import type { InstallStep } from '../types.js'
 import type { Stack } from '../lib/scaffolder.js'
 
 export type { Stack }
 
-export function createProject(stack: Stack, projectName: string): boolean {
+export function createProject(stack: Stack, projectName: string, pkgManager?: PackageManager): boolean {
   return scaffold(stack, projectName)
 }
 
@@ -18,6 +19,7 @@ const TEMPLATE_MAP: Partial<Record<Stack, string>> = {
 export async function applyTemplate(
   stack: Stack,
   projectCwd: string,
+  pkgManager: PackageManager | undefined,
   onStep: (step: InstallStep) => void
 ): Promise<void> {
   const templateId = TEMPLATE_MAP[stack]
