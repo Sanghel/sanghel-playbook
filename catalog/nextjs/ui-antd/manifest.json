@@ -1,0 +1,28 @@
+{
+  "id": "ui-antd",
+  "name": "Ant Design",
+  "description": "Ant Design con AntdRegistry para compatibilidad con Next.js App Router y tema global configurado",
+  "category": "nextjs",
+  "tags": ["nextjs", "ui", "antd", "ant-design"],
+  "deps": {
+    "dependencies": ["antd", "@ant-design/cssinjs"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/components/AntdRegistry.tsx", "dest": "src/components/AntdRegistry.tsx" }
+  ],
+  "patches": [
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "append-import",
+      "content": "import { AntdRegistry } from '@/components/AntdRegistry'"
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "replace",
+      "marker": "{children}",
+      "content": "<AntdRegistry>{children}</AntdRegistry>"
+    }
+  ],
+  "docsUrl": "https://ant.design/docs/react/use-with-next"
+}
