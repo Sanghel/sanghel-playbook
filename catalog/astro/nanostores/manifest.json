@@ -1,0 +1,17 @@
+{
+  "id": "nanostores",
+  "name": "Nanostores",
+  "description": "Estado global con Nanostores — átomos reactivos y mapas de estado compatibles con cualquier framework de isla (React, Vue, Svelte)",
+  "category": "astro",
+  "tags": ["astro", "state", "nanostores"],
+  "deps": {
+    "dependencies": ["nanostores", "@nanostores/react"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/store/appStore.ts", "dest": "src/store/appStore.ts" },
+    { "src": "files/src/store/userStore.ts", "dest": "src/store/userStore.ts" }
+  ],
+  "patches": [],
+  "docsUrl": "https://github.com/nanostores/nanostores"
+}

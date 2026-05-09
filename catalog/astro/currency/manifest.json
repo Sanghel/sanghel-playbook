@@ -1,0 +1,16 @@
+{
+  "id": "currency",
+  "name": "Currency Format Utilities",
+  "description": "Utilidades para formatear monedas y cantidades con Intl.NumberFormat — soporta múltiples locales y parseo de strings",
+  "category": "astro",
+  "tags": ["astro", "utils", "currency", "formatting"],
+  "deps": {
+    "dependencies": [],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/utils/currency.ts", "dest": "src/utils/currency.ts" }
+  ],
+  "patches": [],
+  "docsUrl": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat"
+}

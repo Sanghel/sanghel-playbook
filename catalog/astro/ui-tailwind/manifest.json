@@ -1,0 +1,17 @@
+{
+  "id": "ui-tailwind",
+  "name": "Tailwind CSS + DaisyUI",
+  "description": "Tailwind CSS con DaisyUI — componentes de UI listos y sistema de temas configurado para Astro",
+  "category": "astro",
+  "tags": ["astro", "ui", "tailwind", "daisyui"],
+  "deps": {
+    "dependencies": ["daisyui"],
+    "devDependencies": ["tailwindcss", "@tailwindcss/typography"]
+  },
+  "files": [
+    { "src": "files/tailwind.config.mjs", "dest": "tailwind.config.mjs" },
+    { "src": "files/src/styles/global.css", "dest": "src/styles/global.css" }
+  ],
+  "patches": [],
+  "docsUrl": "https://docs.astro.build/en/guides/styling/#tailwind"
+}
