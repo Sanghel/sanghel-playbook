@@ -21,11 +21,12 @@ export interface DepsMap {
   devDependencies: string[]
 }
 
-export type PatchOperation = 'prepend' | 'append' | 'append-import'
+export type PatchOperation = 'prepend' | 'append' | 'append-import' | 'replace'
 
 export interface ManifestPatch {
   file: string
   operation: PatchOperation
+  marker?: string
   content: string
 }
 

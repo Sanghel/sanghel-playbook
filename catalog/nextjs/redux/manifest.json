@@ -1,0 +1,30 @@
+{
+  "id": "redux",
+  "name": "Redux Toolkit",
+  "description": "Redux Toolkit con store configurado, slice de ejemplo y ReduxProvider para App Router",
+  "category": "nextjs",
+  "tags": ["nextjs", "state", "redux", "redux-toolkit"],
+  "deps": {
+    "dependencies": ["@reduxjs/toolkit", "react-redux"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/store/store.ts", "dest": "src/store/store.ts" },
+    { "src": "files/src/store/slices/appSlice.ts", "dest": "src/store/slices/appSlice.ts" },
+    { "src": "files/src/providers/ReduxProvider.tsx", "dest": "src/providers/ReduxProvider.tsx" }
+  ],
+  "patches": [
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "append-import",
+      "content": "import { ReduxProvider } from '@/providers/ReduxProvider'"
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "replace",
+      "marker": "{children}",
+      "content": "<ReduxProvider>{children}</ReduxProvider>"
+    }
+  ],
+  "docsUrl": "https://redux-toolkit.js.org/introduction/getting-started"
+}

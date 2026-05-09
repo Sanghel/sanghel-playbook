@@ -1,0 +1,30 @@
+{
+  "id": "auth",
+  "name": "NextAuth v5",
+  "description": "Autenticación con NextAuth v5 — auth.ts, SessionProvider y ruta API configurados con Credentials provider",
+  "category": "nextjs",
+  "tags": ["nextjs", "auth", "authentication"],
+  "deps": {
+    "dependencies": ["next-auth@beta"],
+    "devDependencies": []
+  },
+  "files": [
+    { "src": "files/src/auth.ts", "dest": "src/auth.ts" },
+    { "src": "files/src/app/api/auth/[...nextauth]/route.ts", "dest": "src/app/api/auth/[...nextauth]/route.ts" },
+    { "src": "files/src/components/SessionProvider.tsx", "dest": "src/components/SessionProvider.tsx" }
+  ],
+  "patches": [
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "append-import",
+      "content": "import { SessionProvider } from '@/components/SessionProvider'"
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "operation": "replace",
+      "marker": "{children}",
+      "content": "<SessionProvider>{children}</SessionProvider>"
+    }
+  ],
+  "docsUrl": "https://authjs.dev/getting-started/installation"
+}

@@ -1,5 +1,5 @@
 {
   "category": "nextjs",
   "label": "Next.js",
-  "items": []
+  "items": ["auth", "react-query", "react-hook-form", "ui-antd", "ui-mui", "ui-radix", "i18n", "zustand", "redux", "dayjs", "currency"]
 }

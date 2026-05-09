@@ -1,6 +1,6 @@
 import { execSync } from 'child_process'
 import { fetchCatalogIndex, fetchCategoryIndex, fetchManifest } from '../lib/fetcher.js'
-import { installFiles } from '../lib/installer.js'
+import { installFiles, applyPatches } from '../lib/installer.js'
 import { detectPackageManager, getInstallCommand } from '../lib/package-manager.js'
 import type { CategoryRef, ManifestItem, InstallStep } from '../types.js'
 
@@ -34,6 +34,13 @@ export async function runInstall(
     const fileResults = await installFiles(manifest, cwd)
     for (const result of fileResults) {
       onStep({ label: result.path, status: result.error ? 'error' : result.skipped ? 'skipped' : 'done' })
+    }
+
+    if (manifest.patches && manifest.patches.length > 0) {
+      const patchResults = await applyPatches(manifest.patches, cwd)
+      for (const result of patchResults) {
+        onStep({ label: `patch: ${result.path}`, status: result.error ? 'error' : result.skipped ? 'skipped' : 'done' })
+      }
     }
 
     if (manifest.deps.dependencies.length > 0) {
