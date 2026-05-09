@@ -28,6 +28,8 @@ export function formatAmount(
   }).format(amount)
 }
 
+// Note: for financial calculations requiring exact precision, use a library like decimal.js
+// This utility is suitable for display/input parsing only
 export function parseCurrency(value: string): number {
   const cleaned = value.replace(/[^0-9.,]/g, '').replace(',', '.')
   return parseFloat(cleaned) || 0

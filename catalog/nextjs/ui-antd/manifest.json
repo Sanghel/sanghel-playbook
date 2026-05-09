@@ -5,7 +5,7 @@
   "category": "nextjs",
   "tags": ["nextjs", "ui", "antd", "ant-design"],
   "deps": {
-    "dependencies": ["antd", "@ant-design/nextjs-registry"],
+    "dependencies": ["antd", "@ant-design/cssinjs"],
     "devDependencies": []
   },
   "files": [

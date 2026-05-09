@@ -1,3 +1,6 @@
+// Note: this i18next setup is for Client Components only.
+// For Server Components (RSC) in Next.js App Router, import translations directly
+// or use a server-compatible i18n library like next-intl.
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'

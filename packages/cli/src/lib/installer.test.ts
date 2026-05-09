@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mkdtempSync, rmSync, readFileSync, existsSync } from 'fs'
+import { mkdtempSync, rmSync, readFileSync, writeFileSync, existsSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { installFiles } from './installer.js'
+import { installFiles, applyPatches } from './installer.js'
 import * as fetcher from './fetcher.js'
-import type { ManifestItem } from '../types.js'
+import type { ManifestItem, ManifestPatch } from '../types.js'
 
 vi.mock('./fetcher.js')
 
@@ -83,5 +83,104 @@ describe('installFiles', () => {
     const results = await installFiles(mockManifest, tmpDir)
     expect(results[0].skipped).toBe(false)
     expect(results[0].error).toBe('Network error fetching file')
+  })
+})
+
+describe('applyPatches', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), 'patches-test-'))
+  })
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true })
+  })
+
+  it('prepend: inserta el contenido al inicio del archivo', async () => {
+    const filePath = join(tmpDir, 'target.ts')
+    writeFileSync(filePath, 'const existing = true\n', 'utf-8')
+
+    const patches: ManifestPatch[] = [
+      { file: 'target.ts', operation: 'prepend', content: '// prepended line' },
+    ]
+
+    const results = await applyPatches(patches, tmpDir)
+
+    expect(results).toHaveLength(1)
+    expect(results[0].skipped).toBe(false)
+    const written = readFileSync(filePath, 'utf-8')
+    expect(written.startsWith('// prepended line')).toBe(true)
+  })
+
+  it('append: inserta el contenido al final del archivo', async () => {
+    const filePath = join(tmpDir, 'target.ts')
+    writeFileSync(filePath, 'const existing = true\n', 'utf-8')
+
+    const patches: ManifestPatch[] = [
+      { file: 'target.ts', operation: 'append', content: '// appended line' },
+    ]
+
+    const results = await applyPatches(patches, tmpDir)
+
+    expect(results[0].skipped).toBe(false)
+    const written = readFileSync(filePath, 'utf-8')
+    expect(written.endsWith('// appended line')).toBe(true)
+  })
+
+  it('append-import: inserta la línea después del último import', async () => {
+    const filePath = join(tmpDir, 'layout.tsx')
+    writeFileSync(
+      filePath,
+      `import React from 'react'\nimport { Foo } from './foo'\n\nexport default function Layout() {}\n`,
+      'utf-8'
+    )
+
+    const patches: ManifestPatch[] = [
+      {
+        file: 'layout.tsx',
+        operation: 'append-import',
+        content: "import { Bar } from './bar'",
+      },
+    ]
+
+    await applyPatches(patches, tmpDir)
+
+    const written = readFileSync(filePath, 'utf-8')
+    const lines = written.split('\n')
+    const barIndex = lines.indexOf("import { Bar } from './bar'")
+    const fooIndex = lines.indexOf("import { Foo } from './foo'")
+    expect(barIndex).toBeGreaterThan(fooIndex)
+  })
+
+  it('replace: sustituye el marker por el contenido', async () => {
+    const filePath = join(tmpDir, 'layout.tsx')
+    writeFileSync(filePath, '<main>PLACEHOLDER</main>\n', 'utf-8')
+
+    const patches: ManifestPatch[] = [
+      {
+        file: 'layout.tsx',
+        operation: 'replace',
+        marker: 'PLACEHOLDER',
+        content: '<Wrapper>{children}</Wrapper>',
+      },
+    ]
+
+    await applyPatches(patches, tmpDir)
+
+    const written = readFileSync(filePath, 'utf-8')
+    expect(written).toContain('<Wrapper>{children}</Wrapper>')
+    expect(written).not.toContain('PLACEHOLDER')
+  })
+
+  it('file-not-exists: retorna skipped:true si el archivo no existe', async () => {
+    const patches: ManifestPatch[] = [
+      { file: 'nonexistent.tsx', operation: 'prepend', content: '// something' },
+    ]
+
+    const results = await applyPatches(patches, tmpDir)
+
+    expect(results).toHaveLength(1)
+    expect(results[0].skipped).toBe(true)
   })
 })
