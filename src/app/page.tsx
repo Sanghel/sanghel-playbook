@@ -8,15 +8,11 @@ import { UseCaseCard } from '@/components/UseCaseCard'
 import { CopyButton } from '@/components/CopyButton'
 
 const NPX_COMMAND = 'npx sanghel-playbook'
-
-function hasDemoGif() {
-  return existsSync(join(process.cwd(), 'public', 'demo.gif'))
-}
+const showDemo = existsSync(join(process.cwd(), 'public', 'demo.gif'))
 
 export default function Home() {
   const docs = getAllDocs()
   const firstDoc = docs[0]
-  const showDemo = hasDemoGif()
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
