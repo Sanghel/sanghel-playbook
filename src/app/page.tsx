@@ -10,6 +10,22 @@ import { CopyButton } from '@/components/CopyButton'
 const NPX_COMMAND = 'npx sanghel-playbook'
 const showDemo = existsSync(join(process.cwd(), 'public', 'demo.gif'))
 
+// Block-art bitmap font (3 cols × 3 rows per letter, separated by single space)
+// S       A       N       G       H       E       L
+// C       F       O       D       I
+const BLOCK_SANGHEL = [
+  '█▀▀ ▄█▄ █▄█ ▀▀▀ █ █ ███ █  ',
+  '▀▀█ ███ ███ █▄█ ███ █▀▀ █  ',
+  '▀▀▀ █ █ █▀█ ▀▀▀ █ █ ███ ███',
+].join('\n')
+
+// S       C       A       F       F       O       L       D       I       N       G
+const BLOCK_SCAFFOLDING = [
+  '█▀▀ ▀▀▀ ▄█▄ ███ ███ ▀█▀ █   ██▄ ███ █▄█ ▀▀▀',
+  '▀▀█ █   ███ █▀▀ █▀▀ █ █ █   █ █  █  ███ █▄█',
+  '▀▀▀ ▀▀▀ █ █ █   █   ▀█▀ ███ ██▀ ███ █▀█ ▀▀▀',
+].join('\n')
+
 export default function Home() {
   const docs = getAllDocs()
   const firstDoc = docs[0]
@@ -22,29 +38,10 @@ export default function Home() {
 
         {/* Hero */}
         <div className="flex flex-col gap-6">
-          <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-            CLI · Scaffolding
-          </span>
-
-          {/* Block letters SS */}
-          <div className="flex flex-col gap-2">
-            <div className="font-mono text-2xl leading-tight tracking-[3px] select-none">
-              <div>
-                <span className="text-cyan-400">█▀▀</span>{' '}
-                <span className="text-indigo-400">█▀▀</span>
-              </div>
-              <div>
-                <span className="text-cyan-400">▀▀█</span>{' '}
-                <span className="text-indigo-400">▀▀█</span>
-              </div>
-              <div>
-                <span className="text-cyan-400">▀▀▀</span>{' '}
-                <span className="text-indigo-400">▀▀▀</span>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-500 uppercase tracking-[5px]">
-              Sanghel Scaffolding
-            </p>
+          {/* Block-art: SANGHEL / SCAFFOLDING */}
+          <div className="flex flex-col gap-3 select-none font-mono text-sm leading-snug">
+            <pre className="text-cyan-400 m-0">{BLOCK_SANGHEL}</pre>
+            <pre className="text-indigo-400 m-0">{BLOCK_SCAFFOLDING}</pre>
           </div>
 
           <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
