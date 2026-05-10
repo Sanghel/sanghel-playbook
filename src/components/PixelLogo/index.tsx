@@ -60,8 +60,8 @@ export function PixelLogo() {
       aria-label="Sanghel Scaffolding"
       className="select-none"
     >
-      {renderWord('SANGHEL', '#22d3ee', 0)}
-      {renderWord('SCAFFOLDING', '#818cf8', LH + LL)}
+      {renderWord('SANGHEL', '#ffffff', 0)}
+      {renderWord('SCAFFOLDING', '#71717a', LH + LL)}
     </svg>
   )
 }
