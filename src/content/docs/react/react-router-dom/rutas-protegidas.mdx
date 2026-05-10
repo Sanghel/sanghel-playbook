@@ -1,0 +1,54 @@
+---
+title: Rutas protegidas
+description: Patrón PrivateRoute con Outlet para proteger rutas según autenticación.
+order: 42
+---
+
+El patrón de rutas protegidas usa un layout intermedio que comprueba si el usuario está autenticado. Si no lo está, redirige al login.
+
+## Componente PrivateRoute
+
+```tsx
+import { Navigate, Outlet } from 'react-router-dom'
+import { useAuthStore } from '@/stores/authStore'
+
+export function PrivateRoute() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <Outlet />
+}
+```
+
+`<Outlet />` renderiza la ruta hija que coincida con la URL actual.
+
+## Configurar en App.tsx
+
+```tsx
+import { Routes, Route } from 'react-router-dom'
+import { PrivateRoute } from './components/PrivateRoute'
+import { Dashboard } from './pages/Dashboard'
+import { Profile } from './pages/Profile'
+import { Login } from './pages/Login'
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      {/* Rutas protegidas — PrivateRoute actúa como layout padre */}
+      <Route element={<PrivateRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+      </Route>
+    </Routes>
+  )
+}
+```
+
+<Callout variant="info">
+  `replace` en `<Navigate>` evita que la redirección quede en el historial del browser. El usuario no puede volver atrás con la flecha y caer de nuevo en la ruta protegida.
+</Callout>

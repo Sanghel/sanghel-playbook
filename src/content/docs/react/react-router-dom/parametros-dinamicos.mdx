@@ -1,0 +1,50 @@
+---
+title: Parámetros y rutas dinámicas
+description: useParams para leer parámetros de URL, rutas con :id, y pasar estado entre rutas con useLocation.
+order: 43
+---
+
+## Definir una ruta dinámica
+
+```tsx
+// App.tsx
+<Route path="/users/:id" element={<UserDetail />} />
+```
+
+El segmento `:id` captura cualquier valor en esa posición de la URL.
+
+## Leer el parámetro con useParams
+
+```tsx
+import { useParams } from 'react-router-dom'
+
+export function UserDetail() {
+  const { id } = useParams<{ id: string }>()
+
+  return <h1>Usuario #{id}</h1>
+}
+```
+
+## Pasar estado entre rutas con useLocation
+
+```tsx
+// En el origen — pasar estado al navegar
+import { useNavigate } from 'react-router-dom'
+
+const navigate = useNavigate()
+navigate('/users/42', { state: { from: 'dashboard' } })
+```
+
+```tsx
+// En el destino — leer el estado
+import { useLocation } from 'react-router-dom'
+
+export function UserDetail() {
+  const { state } = useLocation()
+  console.log(state?.from) // "dashboard"
+}
+```
+
+<Callout variant="warning">
+  El estado de `useLocation` no persiste si el usuario recarga la página. Úsalo solo para datos efímeros de navegación (ej. de dónde viene el usuario), no para datos críticos.
+</Callout>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#09090b" rx="10"/>
+
+  <!-- Left S — cyan (#22d3ee) -->
+  <!-- Row 1: full block -->
+  <rect x="4" y="10" width="10" height="12" fill="#22d3ee"/>
+  <!-- Row 1: top half -->
+  <rect x="14" y="10" width="10" height="6" fill="#22d3ee"/>
+  <rect x="24" y="10" width="6" height="6" fill="#22d3ee"/>
+  <!-- Row 2: top half -->
+  <rect x="4" y="25" width="10" height="6" fill="#22d3ee"/>
+  <rect x="14" y="25" width="10" height="6" fill="#22d3ee"/>
+  <!-- Row 2: full block -->
+  <rect x="24" y="22" width="6" height="12" fill="#22d3ee"/>
+  <!-- Row 3: top half -->
+  <rect x="4" y="37" width="10" height="6" fill="#22d3ee"/>
+  <rect x="14" y="37" width="10" height="6" fill="#22d3ee"/>
+  <rect x="24" y="37" width="6" height="6" fill="#22d3ee"/>
+
+  <!-- Right S — indigo (#818cf8) -->
+  <!-- Row 1: full block -->
+  <rect x="34" y="10" width="10" height="12" fill="#818cf8"/>
+  <!-- Row 1: top half -->
+  <rect x="44" y="10" width="10" height="6" fill="#818cf8"/>
+  <rect x="54" y="10" width="6" height="6" fill="#818cf8"/>
+  <!-- Row 2: top half -->
+  <rect x="34" y="25" width="10" height="6" fill="#818cf8"/>
+  <rect x="44" y="25" width="10" height="6" fill="#818cf8"/>
+  <!-- Row 2: full block -->
+  <rect x="54" y="22" width="6" height="12" fill="#818cf8"/>
+  <!-- Row 3: top half -->
+  <rect x="34" y="37" width="10" height="6" fill="#818cf8"/>
+  <rect x="44" y="37" width="10" height="6" fill="#818cf8"/>
+  <rect x="54" y="37" width="6" height="6" fill="#818cf8"/>
+</svg>
