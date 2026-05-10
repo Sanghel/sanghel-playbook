@@ -1,62 +1,110 @@
 ---
 title: Getting Started
-description: Bienvenido a sanghel-playbook — patrones, decisiones de componentes y lecciones de software en producción, instalables desde la terminal.
+description: Cómo instalar y usar sanghel-playbook desde la terminal para arrancar o extender tu proyecto.
 order: 1
 ---
 
-
-Bienvenido a **Sanghel Playbook** — un catálogo vivo de patrones, configuraciones y guías que uso en proyectos de producción.
-
-Puedes consumirlo de dos formas:
+**Sanghel Playbook** es un CLI interactivo que scaffoldea proyectos o instala patrones en proyectos existentes. Todo desde la terminal, sin copiar código manualmente.
 
 ---
 
-## CLI/TUI (recomendado)
+## Prerrequisitos
 
-Instala patrones directamente en tu proyecto desde la terminal, sin necesidad de copiar código manualmente.
+- Node.js 18 o superior
+- Un gestor de paquetes: `pnpm`, `npm` o `yarn`
+
+---
+
+## Paso 1 — Ejecutar el CLI
 
 ```bash
 npx sanghel-playbook
 ```
 
-Al ejecutarlo, aparece una TUI interactiva con dos modos:
-
-- **Crear nuevo proyecto** — scaffoldea React + Vite, Next.js o Astro con las herramientas oficiales, y luego ofrece aplicar patrones del catálogo encima.
-- **Añadir a proyecto existente** — navega el catálogo por categoría, selecciona los items que quieres (con espacio), y los instala en tu proyecto actual.
-
-El CLI detecta automáticamente tu package manager (`pnpm`, `yarn` o `npm`) e instala las dependencias necesarias.
-
-### ¿Qué instala?
-
-Cada item del catálogo puede instalar:
-- Archivos de código (hooks, componentes, schemas)
-- Guías y reglas en markdown
-- Dependencias npm requeridas
+No necesitas instalar nada globalmente. `npx` descarga y ejecuta el CLI en el momento.
 
 ---
 
-## Documentación navegable (este site)
+## Paso 2 — Elegir el modo
 
-Explora los patrones con contexto completo: por qué se usan, cuándo aplicarlos, y ejemplos de código. Usa el sidebar para navegar por categoría.
+Al ejecutar el comando aparece una TUI interactiva con dos opciones:
 
----
+```
+┌ ¿Qué quieres hacer?
+● Crear nuevo proyecto
+○ Añadir a proyecto existente
+```
 
-## Catálogo actual
-
-El catálogo crece con cada nuevo patrón documentado. Actualmente incluye:
-
-- **React** — patrones de componentes y formularios
-- **Next.js** — server actions, middleware, API routes, sessions
-- **Astro** — islands, routing, content collections
-- **Rules & Guides** — GitHub Flow, Deploy Guide (Vercel)
+- **Crear nuevo proyecto** — scaffoldea desde cero con el stack que elijas.
+- **Añadir a proyecto existente** — instala patrones del catálogo sobre un proyecto que ya tienes.
 
 ---
 
-## Contribuir al catálogo
+## Paso 3 — Seleccionar el stack
 
-Para añadir un nuevo item:
+Si elegiste "Crear nuevo proyecto":
 
-1. Crear `catalog/{categoria}/{id}/manifest.json` con la metadata
-2. Añadir los archivos fuente en `catalog/{categoria}/{id}/files/`
-3. Crear la doc en `src/content/docs/catalog/{categoria}/{id}.mdx`
-4. Abrir un PR — catálogo y docs se actualizan en el mismo commit
+```
+┌ Elige el stack base:
+● Next.js
+○ React + Vite
+○ Astro
+```
+
+El CLI usa las herramientas oficiales de cada framework (`create-next-app`, `create vite`, `create astro`) para generar el proyecto base.
+
+---
+
+## Paso 4 — Elegir integraciones
+
+Una vez creado el proyecto base, el CLI te muestra las integraciones disponibles para ese stack:
+
+```
+┌ Integraciones para Next.js:
+✓ React Query
+✓ Zustand
+  NextAuth v5
+  i18next
+```
+
+Selecciona con `espacio` y confirma con `enter`. El CLI detecta tu gestor de paquetes automáticamente.
+
+---
+
+## Paso 5 — Resultado
+
+El CLI instala los archivos de código (hooks, componentes, schemas), las guías en markdown y las dependencias npm necesarias.
+
+```
+✓ Proyecto listo en ./mi-app
+```
+
+Para arrancar:
+
+```bash
+cd mi-app
+pnpm dev
+```
+
+---
+
+## Añadir a proyecto existente
+
+Si elegiste "Añadir a proyecto existente", el CLI te muestra el catálogo por categoría:
+
+```
+┌ Categoría:
+● React
+○ Next.js
+○ Astro
+```
+
+Navega, selecciona los patrones que necesitas, y el CLI los instala en tu proyecto actual.
+
+---
+
+## Explorar la documentación
+
+Cada patrón tiene su documentación con contexto, ejemplos y decisiones de diseño.
+
+Usa el sidebar para navegar por categoría o busca con `⌘K`.
