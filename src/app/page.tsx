@@ -26,25 +26,14 @@ export default function Home() {
             CLI · Scaffolding
           </span>
 
-          {/* Block letters SS */}
-          <div className="flex flex-col gap-2">
-            <div className="font-mono text-2xl leading-tight tracking-[3px] select-none">
-              <div>
-                <span className="text-cyan-400">█▀▀</span>{' '}
-                <span className="text-indigo-400">█▀▀</span>
-              </div>
-              <div>
-                <span className="text-cyan-400">▀▀█</span>{' '}
-                <span className="text-indigo-400">▀▀█</span>
-              </div>
-              <div>
-                <span className="text-cyan-400">▀▀▀</span>{' '}
-                <span className="text-indigo-400">▀▀▀</span>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-500 uppercase tracking-[5px]">
-              Sanghel Scaffolding
-            </p>
+          {/* Brand name */}
+          <div className="flex flex-col gap-1 select-none">
+            <span className="font-mono font-bold text-3xl xl:text-4xl tracking-[6px] uppercase text-cyan-400">
+              Sanghel
+            </span>
+            <span className="font-mono font-bold text-3xl xl:text-4xl tracking-[6px] uppercase text-indigo-400">
+              Scaffolding
+            </span>
           </div>
 
           <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
