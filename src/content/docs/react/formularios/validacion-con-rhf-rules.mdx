@@ -1,0 +1,154 @@
+---
+title: Validación con RHF rules
+description: Validar campos con el objeto rules de useController — sin Zod, con control directo desde la definición del campo.
+section: Formularios
+order: 24
+---
+
+La validación se declara directamente en la propiedad `rules` del `useController`. Cada campo lleva sus reglas consigo, sin necesidad de un schema externo.
+
+## rules en useController
+
+```tsx
+import { useController } from 'react-hook-form'
+
+const { field, fieldState } = useController({
+  name: 'email',
+  control,
+  rules: {
+    required: 'El email es requerido',
+    pattern: {
+      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      message: 'Formato de email inválido',
+    },
+  },
+})
+```
+
+`fieldState.error?.message` contiene el mensaje de error cuando la validación falla.
+
+## Reglas disponibles
+
+| Regla | Tipo | Descripción |
+|---|---|---|
+| `required` | `string \| boolean` | Campo obligatorio. El string es el mensaje de error. |
+| `minLength` | `{ value: number, message: string }` | Longitud mínima |
+| `maxLength` | `{ value: number, message: string }` | Longitud máxima |
+| `min` | `{ value: number, message: string }` | Valor mínimo (números) |
+| `max` | `{ value: number, message: string }` | Valor máximo (números) |
+| `pattern` | `{ value: RegExp, message: string }` | Expresión regular |
+| `validate` | `(value) => true \| string` | Validación custom |
+
+## Ejemplo completo con AppInput
+
+```tsx
+import { useController, useForm } from 'react-hook-form'
+import { AppInput } from '@/components/AppInput'
+
+interface LoginFormValues {
+  email: string
+  password: string
+}
+
+export function LoginForm() {
+  const { control, handleSubmit } = useForm<LoginFormValues>({
+    defaultValues: { email: '', password: '' },
+  })
+
+  const { field: emailField, fieldState: emailState } = useController({
+    name: 'email',
+    control,
+    rules: {
+      required: 'El email es requerido',
+      pattern: {
+        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        message: 'Formato de email inválido',
+      },
+    },
+  })
+
+  const { field: passwordField, fieldState: passwordState } = useController({
+    name: 'password',
+    control,
+    rules: {
+      required: 'La contraseña es requerida',
+      minLength: {
+        value: 8,
+        message: 'Mínimo 8 caracteres',
+      },
+    },
+  })
+
+  const onSubmit = handleSubmit((data) => {
+    console.log(data)
+  })
+
+  return (
+    <form onSubmit={onSubmit}>
+      <AppInput
+        {...emailField}
+        label="Email"
+        error={emailState.error?.message}
+      />
+      <AppInput
+        {...passwordField}
+        label="Contraseña"
+        type="password"
+        error={passwordState.error?.message}
+      />
+      <button type="submit">Entrar</button>
+    </form>
+  )
+}
+```
+
+## validate — reglas custom
+
+Para validaciones que no caben en las reglas estándar, usa `validate`:
+
+```tsx
+rules: {
+  validate: (value) => {
+    if (value.includes(' ')) return 'El usuario no puede contener espacios'
+    if (value.length < 3) return 'Mínimo 3 caracteres'
+    return true  // sin error
+  },
+}
+```
+
+## Con DynamicFormBuilder
+
+Si usas el patrón `DynamicFormBuilder`, las reglas se declaran en el array de `FieldDefinition` y el builder las pasa al `useController` de cada campo:
+
+```typescript
+// loginFormFields.ts
+import type { FieldDefinition } from '@/types/forms'
+
+export const loginFormFields: FieldDefinition[] = [
+  {
+    name: 'email',
+    label: 'Email',
+    type: 'text',
+    rules: {
+      required: 'El email es requerido',
+      pattern: {
+        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        message: 'Formato de email inválido',
+      },
+    },
+  },
+  {
+    name: 'password',
+    label: 'Contraseña',
+    type: 'password',
+    rules: {
+      required: 'La contraseña es requerida',
+      minLength: { value: 8, message: 'Mínimo 8 caracteres' },
+    },
+  },
+]
+```
+
+<Callout variant="info">
+  `rules` es la propiedad nativa de React Hook Form. No necesitas `@hookform/resolvers` ni Zod. Los mensajes de error están co-localizados con la definición del campo.
+</Callout>
