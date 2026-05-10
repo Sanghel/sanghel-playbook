@@ -6,25 +6,10 @@ import { getAllDocs } from '@/lib/docs'
 import { TerminalFrame, TerminalFramePlaceholder } from '@/components/TerminalFrame/TerminalFrame'
 import { UseCaseCard } from '@/components/UseCaseCard'
 import { CopyButton } from '@/components/CopyButton'
+import { PixelLogo } from '@/components/PixelLogo'
 
 const NPX_COMMAND = 'npx sanghel-playbook'
 const showDemo = existsSync(join(process.cwd(), 'public', 'demo.gif'))
-
-// Block-art bitmap font (3 cols × 3 rows per letter, separated by single space)
-// S       A       N       G       H       E       L
-// C       F       O       D       I
-const BLOCK_SANGHEL = [
-  '█▀▀ ▄█▄ █▄█ ▀▀▀ █ █ ███ █  ',
-  '▀▀█ ███ ███ █▄█ ███ █▀▀ █  ',
-  '▀▀▀ █ █ █▀█ ▀▀▀ █ █ ███ ███',
-].join('\n')
-
-// S       C       A       F       F       O       L       D       I       N       G
-const BLOCK_SCAFFOLDING = [
-  '█▀▀ ▀▀▀ ▄█▄ ███ ███ ▀█▀ █   ██▄ ███ █▄█ ▀▀▀',
-  '▀▀█ █   ███ █▀▀ █▀▀ █ █ █   █ █  █  ███ █▄█',
-  '▀▀▀ ▀▀▀ █ █ █   █   ▀█▀ ███ ██▀ ███ █▀█ ▀▀▀',
-].join('\n')
 
 export default function Home() {
   const docs = getAllDocs()
@@ -38,11 +23,7 @@ export default function Home() {
 
         {/* Hero */}
         <div className="flex flex-col gap-6">
-          {/* Block-art: SANGHEL / SCAFFOLDING */}
-          <div className="flex flex-col gap-3 select-none font-mono text-sm leading-snug">
-            <pre className="text-cyan-400 m-0">{BLOCK_SANGHEL}</pre>
-            <pre className="text-indigo-400 m-0">{BLOCK_SCAFFOLDING}</pre>
-          </div>
+          <PixelLogo />
 
           <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
             Arranca tu proyecto<br />con todo lo que necesitas
