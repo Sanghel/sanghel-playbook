@@ -1,0 +1,89 @@
+---
+title: Setup básico
+description: Configurar BrowserRouter, definir rutas con Route y navegar con Link y useNavigate.
+order: 41
+---
+
+## Estructura de archivos
+
+```
+src/
+├── main.tsx          ← monta el BrowserRouter
+├── App.tsx           ← define las rutas con Routes
+└── pages/
+    ├── Home.tsx
+    ├── About.tsx
+    └── NotFound.tsx
+```
+
+## main.tsx — montar el router
+
+```tsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+)
+```
+
+## App.tsx — definir rutas
+
+```tsx
+import { Routes, Route } from 'react-router-dom'
+import { Home } from './pages/Home'
+import { About } from './pages/About'
+import { NotFound } from './pages/NotFound'
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  )
+}
+```
+
+## Navegar con Link
+
+```tsx
+import { Link } from 'react-router-dom'
+
+export function Navbar() {
+  return (
+    <nav>
+      <Link to="/">Inicio</Link>
+      <Link to="/about">Sobre mí</Link>
+    </nav>
+  )
+}
+```
+
+## Navegar programáticamente con useNavigate
+
+```tsx
+import { useNavigate } from 'react-router-dom'
+
+export function LoginButton() {
+  const navigate = useNavigate()
+
+  const handleLogin = async () => {
+    await login()
+    navigate('/dashboard')
+  }
+
+  return <button onClick={handleLogin}>Entrar</button>
+}
+```
+
+<Callout variant="info">
+  `useNavigate` solo funciona dentro de componentes que están dentro del `BrowserRouter`. No lo uses en el mismo componente donde montas el router.
+</Callout>
