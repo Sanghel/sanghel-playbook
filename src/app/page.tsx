@@ -5,6 +5,9 @@ import { join } from 'path'
 import { getAllDocs } from '@/lib/docs'
 import { TerminalFrame, TerminalFramePlaceholder } from '@/components/TerminalFrame/TerminalFrame'
 import { UseCaseCard } from '@/components/UseCaseCard'
+import { CopyButton } from '@/components/CopyButton'
+
+const NPX_COMMAND = 'npx sanghel-playbook'
 
 function hasDemoGif() {
   return existsSync(join(process.cwd(), 'public', 'demo.gif'))
@@ -16,28 +19,56 @@ export default function Home() {
   const showDemo = hasDemoGif()
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-full">
-      {/* ── Left: scrollable content ── */}
-      <section className="w-full lg:w-[55%] px-10 py-20 xl:px-16 flex flex-col gap-20">
+    <div className="flex flex-col lg:flex-row min-h-screen">
+
+      {/* ── Left 50%: scrollable content ── */}
+      <section className="w-full lg:w-1/2 px-10 py-20 xl:px-16 flex flex-col gap-16 overflow-y-auto">
 
         {/* Hero */}
         <div className="flex flex-col gap-6">
-          <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
             CLI · Scaffolding
           </span>
-          <h1 className="text-4xl xl:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
+
+          {/* Block letters SS */}
+          <div className="flex flex-col gap-2">
+            <div className="font-mono text-2xl leading-tight tracking-[3px] select-none">
+              <div>
+                <span className="text-cyan-400">█▀▀</span>{' '}
+                <span className="text-indigo-400">█▀▀</span>
+              </div>
+              <div>
+                <span className="text-cyan-400">▀▀█</span>{' '}
+                <span className="text-indigo-400">▀▀█</span>
+              </div>
+              <div>
+                <span className="text-cyan-400">▀▀▀</span>{' '}
+                <span className="text-indigo-400">▀▀▀</span>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-500 uppercase tracking-[5px]">
+              Sanghel Scaffolding
+            </p>
+          </div>
+
+          <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
             Arranca tu proyecto<br />con todo lo que necesitas
           </h1>
-          <p className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-lg">
+          <p className="text-base text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-md">
             Crea proyectos Next.js, React+Vite y Astro con las integraciones que elijas, configuradas y listas para usar.
           </p>
-          <div className="flex items-center gap-3 flex-wrap">
-            <code className="font-mono text-sm bg-zinc-900 dark:bg-zinc-800 text-green-400 px-3 py-1.5 rounded-lg border border-zinc-700">
-              npx sanghel-playbook
-            </code>
+
+          {/* npx box + copy button */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center bg-zinc-900 dark:bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden">
+              <code className="font-mono text-sm text-green-400 px-4 py-2">
+                {NPX_COMMAND}
+              </code>
+              <CopyButton text={NPX_COMMAND} />
+            </div>
             {firstDoc && (
               <Link
-                href={`/docs/${firstDoc.slug.join('/')}`}
+                href={`/documentacion/${firstDoc.slug.join('/')}`}
                 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
               >
                 Ver documentación →
@@ -47,7 +78,7 @@ export default function Home() {
         </div>
 
         {/* Use case cards */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <UseCaseCard
             title="Next.js con autenticación completa"
             description="Proyecto listo con NextAuth v5, sesiones y Credentials provider configurado. Solo añade tu base de datos."
@@ -55,8 +86,8 @@ export default function Home() {
           />
           <UseCaseCard
             title="React + Vite con estado y formularios"
-            description="Zustand para estado global, React Hook Form con validación Zod y React Query para fetching de datos."
-            chips={['Zustand', 'React Query', 'Hook Form', 'Zod']}
+            description="Zustand para estado global, React Hook Form con validación y React Query para fetching de datos."
+            chips={['Zustand', 'React Query', 'Hook Form']}
           />
           <UseCaseCard
             title="Next.js internacionalizado"
@@ -65,7 +96,7 @@ export default function Home() {
           />
           <UseCaseCard
             title="React + Vite con UI y routing"
-            description="React Router DOM con rutas base, Ant Design con tema global y utilidades de formato de fechas y moneda."
+            description="React Router DOM con rutas base, Ant Design con tema global y utilidades de formato."
             chips={['React Router', 'Ant Design', 'Day.js']}
           />
           <UseCaseCard
@@ -89,7 +120,7 @@ export default function Home() {
             <>
               <span>·</span>
               <Link
-                href={`/docs/${firstDoc.slug.join('/')}`}
+                href={`/documentacion/${firstDoc.slug.join('/')}`}
                 className="hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
               >
                 Documentación
@@ -99,11 +130,10 @@ export default function Home() {
           <span>·</span>
           <span>npm · pnpm · yarn</span>
         </div>
-
       </section>
 
-      {/* ── Right: sticky terminal ── */}
-      <aside className="hidden lg:flex lg:w-[45%] sticky top-0 h-screen items-center justify-center bg-zinc-950 dark:bg-[#0a0a0a] p-8 border-l border-zinc-800">
+      {/* ── Right 50%: sticky terminal ── */}
+      <aside className="hidden lg:flex lg:w-1/2 sticky top-0 h-screen items-center justify-center bg-zinc-950 dark:bg-[#0a0a0a] p-10 border-l border-zinc-800">
         {showDemo ? (
           <TerminalFrame>
             <Image
@@ -121,6 +151,7 @@ export default function Home() {
           </TerminalFramePlaceholder>
         )}
       </aside>
+
     </div>
   )
 }
@@ -143,17 +174,10 @@ function DemoPlaceholder() {
         <div className="text-zinc-600">  Astro</div>
       </div>
       <div className="pl-4 flex flex-col gap-1 text-zinc-400 mt-2">
-        <div className="text-zinc-500 text-xs">Gestor de paquetes:</div>
-        <div><span className="text-green-400">▶</span>{' '}pnpm</div>
-        <div className="text-zinc-600">  npm</div>
-        <div className="text-zinc-600">  yarn</div>
-      </div>
-      <div className="pl-4 flex flex-col gap-1 text-zinc-400 mt-2">
-        <div className="text-zinc-500 text-xs">Integraciones para Next.js:</div>
-        <div><span className="text-zinc-500 text-xs">[ ]</span>{' '}<span className="text-zinc-400">NextAuth v5</span></div>
+        <div className="text-zinc-500 text-xs">Integraciones:</div>
         <div><span className="text-green-400 text-xs">[✓]</span>{' '}<span className="text-green-400">React Query</span></div>
         <div><span className="text-green-400 text-xs">[✓]</span>{' '}<span className="text-green-400">Zustand</span></div>
-        <div><span className="text-zinc-500 text-xs">[ ]</span>{' '}<span className="text-zinc-400">i18next</span></div>
+        <div><span className="text-zinc-500 text-xs">[ ]</span>{' '}<span className="text-zinc-400">NextAuth v5</span></div>
       </div>
     </div>
   )
