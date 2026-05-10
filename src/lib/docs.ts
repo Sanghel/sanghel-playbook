@@ -62,15 +62,15 @@ export function getAdjacentDocs(slug: string[]): {
   next: { title: string; href: string } | null
 } {
   const docs = getAllDocs()
-  const currentHref = `/docs/${slug.join('/')}`
-  const index = docs.findIndex((doc) => `/docs/${doc.slug.join('/')}` === currentHref)
+  const currentHref = `/documentacion/${slug.join('/')}`
+  const index = docs.findIndex((doc) => `/documentacion/${doc.slug.join('/')}` === currentHref)
 
   const prev = index > 0 ? docs[index - 1] : null
   const next = index < docs.length - 1 ? docs[index + 1] : null
 
   return {
-    prev: prev ? { title: prev.frontmatter.title, href: `/docs/${prev.slug.join('/')}` } : null,
-    next: next ? { title: next.frontmatter.title, href: `/docs/${next.slug.join('/')}` } : null,
+    prev: prev ? { title: prev.frontmatter.title, href: `/documentacion/${prev.slug.join('/')}` } : null,
+    next: next ? { title: next.frontmatter.title, href: `/documentacion/${next.slug.join('/')}` } : null,
   }
 }
 
@@ -86,7 +86,7 @@ export function getNavigation(): NavGroup[] {
     const { slug, frontmatter: fm } = doc
     const item: NavItem = {
       title: fm.title ?? slug[slug.length - 1].replace(/-/g, ' '),
-      href: `/docs/${slug.join('/')}`,
+      href: `/documentacion/${slug.join('/')}`,
       slug,
     }
 
